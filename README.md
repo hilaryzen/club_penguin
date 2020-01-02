@@ -12,11 +12,18 @@ We also plan to use structs for each avatar that will contain information like i
 
 We have divided the project into three main parts. Kiran will implement the networking aspect, Alma will build the chat feature, and Hilary will create the terminal display of avatars. Since the chat and avatar display are all on one screen, Hilary and Alma will also need to work together to integrate those two aspects. One challenge may be implementing a scrolling chat, while the igloo display remains static in position.
 
-Timeline
+# Timeline
+
 Jan 6: Player can start the program and move an avatar on the screen
+
 Jan 8: Add a chat where the player can type messages and see them on the screen
+
 Jan 13: Complete networking so that multiple players can join the game
+
 Jan 15: All players can type into the chat, but only one message is added at a time
+
 Jan 17: Add different rooms where players can go into
+
 (Extra) Add some minigames that only involve one player
+
 (Extra) Scrollable chat
