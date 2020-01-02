@@ -6,12 +6,12 @@ all: server.o client.o sema.o err.o processor.o render.o
 	gcc $(CFLAGS) -o server server.o sema.o err.o processor.o
 	gcc $(CFLAGS) -o client client.o render.o
 
-server.o: server.c server.h sema.h err.h processor.h
+server.o: server.c server.h sema.h err.h processor.h packets.h
 	gcc $(CFLAGS) -c server.c
-client.o: client.c client.h
+client.o: client.c client.h packets.h
 	gcc $(CFLAGS) -c client.c
 
-processor.o: processor.c processor.h sema.h
+processor.o: processor.c processor.h sema.h packets.h
 	gcc $(CFLAGS) -c processor.c
 render.o: render.c render.h
 	gcc $(CFLAGS) -c render.c
