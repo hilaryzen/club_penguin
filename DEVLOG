@@ -1,0 +1,8 @@
+DEVLOG
+
+kiranV -- 2020-01-02 15:10
+    -found some constants online that i think will be helpful in the process of printing, for down the line
+    -wrote basic helper functions for clearing terminal, drawing a penguin, resizing the terminal, etc
+
+kiranV -- 2020-01-03 11:50
+    -began writing helper server functions with a whole lot of help from dwsource's networking.c reference file
