@@ -1,6 +1,8 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
+#define PORT "2024"
+
 enum packet_t {
   P_CNX_HEADER,
   P_CHATMSG,
