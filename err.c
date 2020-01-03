@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <errno.h>
 void exit_err(int i,char *msg){
   if( i < 0 ) {
-    printf("error #%s during [%s]: %s",errno,msg,strerror(errno));
+    printf("error #%d during [%s]: %s",errno,msg,strerror(errno));
     exit(errno);
   }
 }
