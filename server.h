@@ -3,7 +3,6 @@
 
 /* FOR EXTERNAL USE */
 
-
 /* this is ... weird lmao */
 int main();
 
