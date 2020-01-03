@@ -1,7 +1,17 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#define MAX_CNX 8
+#define KEY 91289
+
+#define CNX_SEMA 0
+#define SHM_SEMA 1
+#define QUEUE_SEMA 2
+
 /* FOR EXTERNAL USE */
+
+/* utility */
+int clean_id();
 
 /* this is ... weird lmao */
 int main();

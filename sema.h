@@ -1,5 +1,5 @@
 #ifndef SEMA_H
-#define SEMA_h
+#define SEMA_H
 
 int sem_config(int key,int flags,int n,...);
 int sem_connect(int key,int n);

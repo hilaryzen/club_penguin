@@ -1,13 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
 #include <netdb.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #include "err.h"
 #include "packets.h"
+#include "sema.h"
+#include "server.h"
 
+int SEMD;
+int SHMD;
+struct cnx_header *SHM;
+
+int main(){
+  // declarations 
+  int client_sockets[MAX_CNX];
+  int merger_pid = 0;
+  int f,r;
+  // create socket listening over internet
+  int listen_socket = server_setup();
+  // create queue pipe
+  int queue[2];
+  r = pipe(queue);
+  exit_err(r,"create queue pipe");
+  // configure/attach shared memory
+  SHMD = shmget(KEY, MAX_CNX * sizeof(struct cnx_header), IPC_CREAT|IPC_EXCL|0644);
+  exit_err(SHMD,"creating shared memory");
+  SHM = shmat(SHMD,0,0);
+  exit_err(SHM,"attaching to memory");
+
+  SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,3,MAX_CNX,1,1);
+  
+  while (1) {
+    
+  }
+}
+
+
+int clean_id(){
+  /* should not be used without having first gotten the sem! ! ! */
+  int i = 0;
+  while( i < MAX_CNX && SHM[i].id ) i++;
+  return i==MAX_CNX ? -1 : i;
+}
 
 /* this is almost exactly the dwsource code when we learn more maybe ill change it lol
 thanks mr dw! */
