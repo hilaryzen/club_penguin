@@ -13,6 +13,7 @@
 #include "packets.h"
 #include "sema.h"
 #include "server.h"
+#include "processor.h"
 
 int SEMD;
 int SHMD;
@@ -54,7 +55,7 @@ int main(){
       for( i=0; i<MAX_CNX; i++ ){
 	if( i!=id ) close(SHM[i].sd);
       }
-      subserver_listen(id);
+      subserver_listen(id,queue[WRITE]);
       exit(0);
     }
     // refresh queue handler
@@ -63,12 +64,38 @@ int main(){
     if(!queue_handler){
       child_init_ipc();
       close(queue[WRITE]);
-      process_queue();
+      process_queue(queue[READ]);
       exit(0);
     }
   }
 }
 
+void process_queue(int qd){
+  struct packet_header header;
+  union packet packet;
+  int i;
+  printf("(just out of curiosity but also this means the queue restarted: sizeof( enum packet_t ) == %ld\n",sizeof(enum packet_t));
+  while( read(qd,&header,sizeof( struct packet_header )) ){
+    printf("[queue handler %d] handling packet\n",getpid());
+    read(qd,&packet,header.packet_size);
+    for( i=0; i<MAX_CNX; i++ ){
+      if( should_receive(SHM+i,&header,&packet) ){
+	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
+	write( SHM[i].sd, &packet, header.packet_size );
+      }
+    }
+  }
+}
+void subserver_listen(int id,int qd){
+  struct packet_header header;
+  union packet packet;
+  while( read(SHM[id].sd,&header,sizeof( struct packet_header )) ){
+    printf("[subserver %d] received a packet\n",getpid());
+    read(SHM[id].sd,&packet,header.packet_size);
+    process(SHM+id,&header,&packet,qd);
+  }
+  printf("[subserver %d] eof reached\n",getpid());
+}
 
 int clean_id(){
   /* should not be used without having first gotten the sem! ! ! */
