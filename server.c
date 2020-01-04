@@ -60,6 +60,7 @@ int main(){
       for( i=0; i<MAX_CNX; i++ ){
 	if( i!=id ) close(SHM[i].sd);
       }
+      printf("[subserver %d] about to listen\n",getpid());
       subserver_listen(id,queue[WRITE]);
       exit(0);
     }
@@ -123,8 +124,6 @@ void child_init_ipc(){
   SHMD = shmget(KEY,0,0);
   exit_err(SHMD,"connecting to shared memory");
   SHM = shmat(SHMD,0,0);
-  exit_err((long)SHM,"attaching to memory");
-
   SEMD = sem_connect(KEY,NSEMS);  
 }
 
