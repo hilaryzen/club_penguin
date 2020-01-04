@@ -20,6 +20,11 @@ void qwrite(struct packet_header *header,union packet *packet, int qd);
 int clean_id();
 void child_init_ipc();
 
+/* signal/exit handling stuff */
+void main_sighandler(int signal);
+void subserver_sighandler(int signal);
+void queue_sighandler(int signal);
+
 /* this is ... weird lmao */
 int main();
 

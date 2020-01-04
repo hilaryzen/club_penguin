@@ -36,6 +36,10 @@ int main(){
   SHM = shmat(SHMD,0,0);
 
   SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,NSEMS,MAX_CNX,1,1);
+
+  // signal handling
+  signal(SIGTERM,main_sighandler);
+  signal(SIGINT,main_sighandler);
   
   while (1) {
     int client_sd = server_connect(listen_socket);
@@ -49,6 +53,8 @@ int main(){
     sem_release(SEMD,SHM_SEMA);
     f = fork();
     if(!f){
+      signal(SIGTERM,subserver_sighandler);
+      signal(SIGINT,subserver_sighandler);
       child_init_ipc();
       close(queue[READ]);
       for( i=0; i<MAX_CNX; i++ ){
@@ -61,6 +67,9 @@ int main(){
     if(queue_handler) kill(queue_handler,SIGTERM);
     queue_handler = fork();
     if(!queue_handler){
+      signal(SIGTERM,queue_sighandler);
+      signal(SIGINT,queue_sighandler);
+      signal(SIGPIPE,queue_sighandler);
       child_init_ipc();
       close(queue[WRITE]);
       process_queue(queue[READ]);
@@ -158,4 +167,47 @@ int server_connect(int sd){
   client_socket = accept(sd, (struct sockaddr *)&client_address, &sock_size);
   exit_err(client_socket, "server accept");
   printf("[server] client accepted\n");
+}
+
+void main_sighandler(int signal){
+  switch(signal){
+
+  case SIGINT: case SIGTERM:
+    printf("[server %d]shutting down\n",getpid());
+    sem_remove(SEMD);
+    shmdt(SHM);
+    shmctl(SHMD,IPC_RMID,0);
+    exit(SIGTERM);
+    break;
+    
+  default:
+    break;
+  }
+}
+void subserver_sighandler(int signal){
+  switch(signal){
+
+  case SIGINT: case SIGTERM:
+    printf("[subserver %d]shutting down\n",getpid());
+    shmdt(SHM);
+    exit(SIGTERM);
+    break;
+    
+  default:
+    break;
+  }
+}
+void queue_sighandler(int signal){
+  switch(signal){
+  case SIGINT: case SIGTERM:
+    printf("[qhandler %d]shutting down\n",getpid());
+    shmdt(SHM);
+    exit(SIGTERM);
+    break;
+  case SIGPIPE:
+    printf("[qhandler %d]broken pipe\n",getpid());
+    break;
+  default:
+    break;
+  }
 }
