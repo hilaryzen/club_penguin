@@ -14,7 +14,7 @@
 
 /* FOR EXTERNAL USE */
 
-void qwrite(union packet *packet,int id,enum packet_t packet_type,int qd);
+void qwrite(struct packet_header *header,union packet *packet, int qd);
 
 /* utility */
 int clean_id();

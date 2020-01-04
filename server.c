@@ -34,7 +34,6 @@ int main(){
   SHMD = shmget(KEY, MAX_CNX * sizeof(struct cnx_header), IPC_CREAT|IPC_EXCL|0644);
   exit_err(SHMD,"creating shared memory");
   SHM = shmat(SHMD,0,0);
-  exit_err((long)SHM,"attaching to memory");
 
   SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,NSEMS,MAX_CNX,1,1);
   
@@ -97,6 +96,13 @@ void subserver_listen(int id,int qd){
   printf("[subserver %d] eof reached\n",getpid());
 }
 
+void qwrite(struct packet_header *header,union packet *packet, int qd){
+  sem_claim(SEMD,QUEUE_SEMA);
+  write( qd, header, sizeof( struct packet_header ) );
+  write( qd, packet, header->packet_size );
+  sem_release(SEMD,QUEUE_SEMA);
+}
+
 int clean_id(){
   /* should not be used without having first gotten the sem! ! ! */
   int i = 0;
@@ -141,6 +147,7 @@ int server_setup(){
 
   freeaddrinfo(results);
   free(hints);
+  return sd;
 }
 
 int server_connect(int sd){

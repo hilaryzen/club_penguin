@@ -4,7 +4,7 @@
 #include <errno.h>
 void exit_err(int i,char *msg){
   if( i < 0 ) {
-    printf("error #%d during [%s]: %s",errno,msg,strerror(errno));
+    printf("error #%d during [%s]: %s\n",errno,msg,strerror(errno));
     exit(errno);
   }
 }

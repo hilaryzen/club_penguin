@@ -7,7 +7,7 @@
 
 
 void process( struct cnx_header *cnx_info, struct packet_header *header, union packet *packet , int qd){
-  qwrite(packet, header->id, header->packet_type,qd);
+  qwrite(header, packet,qd);
 }
 
 int should_receive( struct cnx_header *cnx_info, struct packet_header *header, union packet *packet ){
