@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <signal.h>
 
 #include "err.h"
 #include "packets.h"
@@ -32,12 +33,27 @@ int main(){
   SHMD = shmget(KEY, MAX_CNX * sizeof(struct cnx_header), IPC_CREAT|IPC_EXCL|0644);
   exit_err(SHMD,"creating shared memory");
   SHM = shmat(SHMD,0,0);
-  exit_err(SHM,"attaching to memory");
+  exit_err((long)SHM,"attaching to memory");
 
-  SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,3,MAX_CNX,1,1);
+  SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,NSEMS,MAX_CNX,1,1);
   
   while (1) {
-    
+    int client_sd = server_connect(listen_socket);
+    struct cnx_header cnx_info;
+    read(client_sd,&cnx_info,sizeof(struct cnx_header));
+    sem_claim(SEMD,SHM_SEMA);
+    int id = clean_id();
+    SHM[id] = cnx_info;
+    SHM[id].id = id;
+    SHM[id].sd = client_sd;
+    sem_release(SEMD,SHM_SEMA);
+    f = fork();
+    if(!f){
+      child_init_ipc();
+      subserver_listen(id);
+      exit(0);
+    }
+    // refresh 
   }
 }
 
@@ -47,6 +63,15 @@ int clean_id(){
   int i = 0;
   while( i < MAX_CNX && SHM[i].id ) i++;
   return i==MAX_CNX ? -1 : i;
+}
+
+void child_init_ipc(){
+  SHMD = shmget(KEY,0,0);
+  exit_err(SHMD,"connecting to shared memory");
+  SHM = shmat(SHMD,0,0);
+  exit_err((long)SHM,"attaching to memory");
+
+  SEMD = sem_connect(KEY,NSEMS);  
 }
 
 /* this is almost exactly the dwsource code when we learn more maybe ill change it lol

@@ -17,6 +17,7 @@ struct packet_header {
 
 struct cnx_header {
   int id;
+  int sd;
   char username[16];
   int room;
 };

@@ -7,11 +7,13 @@
 #define CNX_SEMA 0
 #define SHM_SEMA 1
 #define QUEUE_SEMA 2
+#define NSEMS 3
 
 /* FOR EXTERNAL USE */
 
 /* utility */
 int clean_id();
+void child_init_ipc();
 
 /* this is ... weird lmao */
 int main();
