@@ -14,6 +14,8 @@
 
 /* FOR EXTERNAL USE */
 
+void qwrite(union packet *packet,int id,enum packet_t packet_type,int qd);
+
 /* utility */
 int clean_id();
 void child_init_ipc();
