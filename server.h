@@ -9,6 +9,9 @@
 #define QUEUE_SEMA 2
 #define NSEMS 3
 
+#define READ 0
+#define WRITE 1
+
 /* FOR EXTERNAL USE */
 
 /* utility */

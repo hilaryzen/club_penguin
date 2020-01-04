@@ -21,8 +21,8 @@ struct cnx_header *SHM;
 int main(){
   // declarations 
   int client_sockets[MAX_CNX];
-  int merger_pid = 0;
-  int f,r;
+  int queue_handler = 0;
+  int f,r,i;
   // create socket listening over internet
   int listen_socket = server_setup();
   // create queue pipe
@@ -50,10 +50,22 @@ int main(){
     f = fork();
     if(!f){
       child_init_ipc();
+      close(queue[READ]);
+      for( i=0; i<MAX_CNX; i++ ){
+	if( i!=id ) close(SHM[i].sd);
+      }
       subserver_listen(id);
       exit(0);
     }
-    // refresh 
+    // refresh queue handler
+    if(queue_handler) kill(queue_handler,SIGTERM);
+    queue_handler = fork();
+    if(!queue_handler){
+      child_init_ipc();
+      close(queue[WRITE]);
+      process_queue();
+      exit(0);
+    }
   }
 }
 
