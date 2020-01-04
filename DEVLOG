@@ -8,3 +8,6 @@ kiranV -- 2020-01-03 15:50
     -began writing helper server functions with a whole lot of help from dwsource's networking.c reference file
     -wrote utility functions for accessing/configuring semaphores in sema.c
     -wrote beginning of server main(), configuring all the necessary pieces before beginning to accept connections
+
+kiranV -- 2020-01-04 07:52
+   -finished a theoretically working server, along with signal handling for a clean exit upon ^C; largely untested because there is no working client yet
