@@ -96,17 +96,28 @@ void process_queue(int qd){
   }
 }
 void subserver_listen(int id,int qd){
+  int r;
   struct packet_header header;
   union packet packet;
-  while( read(SHM[id].sd,&header,sizeof( struct packet_header )) ){
+  printf("[subserver %d] ready to listen: id %d(%d), sd %d\n",getpid(),SHM[id].id,id,SHM[id].sd);
+  while( r = read(SHM[id].sd,&header,sizeof( struct packet_header )) ){
+    exit_err(r,"socket read");
+    printf("return value: %d\n",r);
+    if( r != sizeof(struct packet_header) ){
+      printf("smol\n");
+      exit(0);
+    }
     printf("[subserver %d] received a packet\n",getpid());
     read(SHM[id].sd,&packet,header.packet_size);
     process(SHM+id,&header,&packet,qd);
+    sleep(2);
+    printf("\n\n\nqd: %d\n\n\n",qd);
   }
   printf("[subserver %d] eof reached\n",getpid());
 }
 
 void qwrite(struct packet_header *header,union packet *packet, int qd){
+  printf("\n\n[qwrite]\n");
   sem_claim(SEMD,QUEUE_SEMA);
   write( qd, header, sizeof( struct packet_header ) );
   write( qd, packet, header->packet_size );

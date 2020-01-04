@@ -48,7 +48,11 @@ int main(int argc, char *argv[]){
     }
     if (FD_ISSET(sd,&select_read)) {
       printf("[client] received packet from server\n");
-      read(sd,&header,sizeof(struct packet_header));
+      r = read(sd,&header,sizeof(struct packet_header));
+      if(r != sizeof(struct packet_header)){
+	printf("eof i think\n");
+	exit(0);
+      }
       read(sd,&packet,header.packet_size);
       printf("message: [%s]\n",packet.CHATMSG.message);
     }
