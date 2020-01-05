@@ -30,6 +30,7 @@ int main(){
   int queue[2];
   r = pipe(queue);
   exit_err(r,"create queue pipe");
+  
   // configure/attach shared memory
   SHMD = shmget(KEY, MAX_CNX * sizeof(struct cnx_header), IPC_CREAT|IPC_EXCL|0644);
   exit_err(SHMD,"creating shared memory");
@@ -82,18 +83,15 @@ void process_queue(int qd){
   struct packet_header header;
   union packet packet;
   int i;
-  printf("(just out of curiosity but also this means the queue restarted: sizeof( enum packet_t ) == %ld\n",sizeof(enum packet_t));
+  printf("[qhandler %d] start\n",getpid());
   while( read(qd,&header,sizeof( struct packet_header )) ){
     printf("[queue handler %d] handling packet\n",getpid());
     read(qd,&packet,header.packet_size);
     for( i=0; i<MAX_CNX; i++ ){
-      printf("[%d]: id=%d, sd=%d",i,SHM[i].id,SHM[i].sd);
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
-	printf(": writing\n");
 	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
 	write( SHM[i].sd, &packet, header.packet_size );
       }
-      printf("\n");
     }
   }
 }
@@ -117,6 +115,7 @@ void subserver_listen(int id,int qd){
   close(SHM[id].sd);
   sem_release(SEMD,SHM_SEMA);
   shmdt(SHM);
+  printf("[subserver %d] shutting down\n",getpid());
   exit(0);
 }
 
