@@ -18,3 +18,7 @@ kiranV -- 2020-01-04 21:30
 kiranV -- 2020-01-05 09:00
    -fixed bugs surrounding ID's and identifying empty spaces in the shared memory, as well as a couple others; all seems to be working with the server structure!
    -clean(ing) up and comment(ing) code to make it not so nightmarish to read
+
+almaT -- 2020-01-05 13:27
+   -began looking through Kiran's server and planning out how to modify how chat appears on terminal
+   -right now filling this out because I forgot how to set a branch upstream
