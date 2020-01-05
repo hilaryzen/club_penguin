@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
   struct packet_header header;
   union packet packet;
   struct cnx_header cnx_info; // struct which contains information about our connection
-    
+
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
   fgets(cnx_info.username,16,stdin);
   *(strchr(cnx_info.username,'\n')) = '\0'; // eliminate newline
   cnx_info.room = 0;
-  
+
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
@@ -46,14 +46,14 @@ int main(int argc, char *argv[]){
     // 1. PRINT CURRENT STATE
     //   -right now this is just printing a new prompt
     //   -unless we use sdl or something, we could use this space to reprint the current state of the game/messages
-    
+
     fflush(stdin); // i do not understand what this does but it was in mr dw's code and stuff acts weird without it
     printf("enter data: ");
-    
+
     // 2. SELECT(): reset set configuration and then wait for one of the internal sd's to have data; either stdin or sd
     reset_fdset(&readset,sd);
     select(sd+1,&readset,NULL,NULL,NULL);
-    
+
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       // get the message, remove the newline
@@ -73,8 +73,8 @@ int main(int argc, char *argv[]){
       r = read(sd,&header,sizeof(struct packet_header));
       // this is my current makeshift way of checking whether the received message is an end of file
       if(r != sizeof(struct packet_header)){
-	printf("eof i think\n");
-	exit(0);
+	       printf("eof i think\n");
+	        exit(0);
       }
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
@@ -107,7 +107,7 @@ int client_setup(char *server){
   // free the resources we used
   free(hints);
   freeaddrinfo(results);
-  
+
   return sd;
 }
 
@@ -115,5 +115,5 @@ void reset_fdset(fd_set *set,int sd){
   /* uses the macro's specified in [man select] to set up a new fd set containing both stdin and the specified additional descriptor in `sd` */
   FD_ZERO(set);
   FD_SET(STDIN_FILENO,set);
-  FD_SET(sd,set);  
+  FD_SET(sd,set);
 }

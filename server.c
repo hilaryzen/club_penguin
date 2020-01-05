@@ -31,7 +31,7 @@ int main(){
 
   // CONFIGURATION
   // create socket listening for new connections
-  listen_socket = server_setup(); 
+  listen_socket = server_setup();
   // create outbox queue pipe
   r = pipe(queue);
   exit_err(r,"create queue pipe");
@@ -91,7 +91,7 @@ int main(){
       signal(SIGTERM,queue_sighandler);
       signal(SIGINT,queue_sighandler);
       signal(SIGPIPE,queue_sighandler); // this isn't used yet but i could see it being useful
-      // attach to shared memory and get a shm id 
+      // attach to shared memory and get a shm id
       child_init_ipc();
       // close the write end of this pipe since we will be reading from it in this process
       close(queue[WRITE]);
@@ -107,9 +107,9 @@ void process_queue(int qd){
   // OUTBOX QUEUE HANDLER PROCESS
   /* this process dispatches messages written to the outbox queue to users */
   /* who the messages are sent to is determined by processor.c:should_receive() */
-  
+
   // DECLARATIONS: space in which to read in packets from the queue
-  struct packet_header header; 
+  struct packet_header header;
   union packet packet;
   int i; // index incrementer
   printf("[qhandler %d] start\n",getpid());
@@ -185,7 +185,7 @@ void child_init_ipc(){
   SHMD = shmget(KEY,0,0);
   exit_err(SHMD,"connecting to shared memory");
   SHM = shmat(SHMD,0,0);
-  SEMD = sem_connect(KEY,NSEMS);  
+  SEMD = sem_connect(KEY,NSEMS);
 }
 
 /* this is almost exactly the dwsource code when we learn more maybe ill change it lol
@@ -197,6 +197,7 @@ int server_setup(){
   // configure an internet socket (AF_INET => Internet, IPv4 specifically)
   // not yet attached to anything
   sd = socket( AF_INET, SOCK_STREAM, 0 );
+  //note: you only exit if sd < 0
   exit_err( sd, "creating server socket" );
   printf("[server] socket created\n");
 
@@ -213,7 +214,7 @@ int server_setup(){
   r = bind( sd, results->ai_addr, results->ai_addrlen );
   exit_err( r, "server bind" );
   printf("[server] socket bound\n");
-  
+
   // set socket to listen state
   r = listen(sd,10); // 10 is the number of connections that can be backlogged waiting to connect
   exit_err( r , "server listen" );
@@ -232,7 +233,7 @@ int server_connect(int sd){
   socklen_t sock_size;
   struct sockaddr_storage client_address;
   sock_size = sizeof(client_address);
-  
+
   /* blocks until a client is present to connect */
   /* once a client is there, stores their IPv4 adress in `client_address` */
   client_socket = accept(sd, (struct sockaddr *)&client_address, &sock_size);
@@ -253,7 +254,7 @@ void main_sighandler(int signal){
     shmctl(SHMD,IPC_RMID,0);
     exit(SIGTERM);
     break;
-    
+
   default:
     break;
   }
@@ -267,7 +268,7 @@ void subserver_sighandler(int signal){
     shmdt(SHM);
     exit(SIGTERM);
     break;
-    
+
   default:
     break;
   }
