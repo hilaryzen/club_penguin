@@ -34,6 +34,7 @@ int main(){
   SHMD = shmget(KEY, MAX_CNX * sizeof(struct cnx_header), IPC_CREAT|IPC_EXCL|0644);
   exit_err(SHMD,"creating shared memory");
   SHM = shmat(SHMD,0,0);
+  for(i=0;i<MAX_CNX;i++) SHM[i].id = -1;
 
   SEMD = sem_config(KEY,IPC_CREAT|IPC_EXCL|0644,NSEMS,MAX_CNX,1,1);
 
@@ -87,7 +88,7 @@ void process_queue(int qd){
     read(qd,&packet,header.packet_size);
     for( i=0; i<MAX_CNX; i++ ){
       printf("[%d]: id=%d, sd=%d",i,SHM[i].id,SHM[i].sd);
-      if( SHM[i].id==i && should_receive(SHM+i,&header,&packet) ){
+      if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
 	printf(": writing\n");
 	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
 	write( SHM[i].sd, &packet, header.packet_size );
@@ -111,6 +112,12 @@ void subserver_listen(int id,int qd){
     process(SHM+id,&header,&packet,qd);
   }
   printf("[subserver %d] eof reached\n",getpid());
+  sem_claim(SEMD,SHM_SEMA);
+  SHM[id].id = -1;
+  close(SHM[id].sd);
+  sem_release(SEMD,SHM_SEMA);
+  shmdt(SHM);
+  exit(0);
 }
 
 void qwrite(struct packet_header *header,union packet *packet, int qd){
@@ -123,7 +130,7 @@ void qwrite(struct packet_header *header,union packet *packet, int qd){
 int clean_id(){
   /* should not be used without having first gotten the sem! ! ! */
   int i = 0;
-  while( i < MAX_CNX && SHM[i].id==i ) i++;
+  while( i < MAX_CNX && SHM[i].id>=0 ) i++;
   return i==MAX_CNX ? -1 : i;
 }
 
