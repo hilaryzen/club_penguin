@@ -10,4 +10,11 @@ void reset_fdset(fd_set *set, int sd); // zeroes `set` and puts stdin and the sp
 
 int client_setup(char *server);
 
+/*
+Will add any message sent out or recieved to your chat log file
+Later, develop method to display the log on screen
+Later later, develop scrolling
+*/
+int update_log(chat *addition);
+
 #endif

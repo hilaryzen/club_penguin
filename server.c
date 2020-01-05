@@ -77,6 +77,8 @@ int main(){
       // close the read end of this pipe because we will be writing to it
       close(queue[READ]);
       printf("[subserver %d] about to listen\n",getpid());
+      //gonna print the username
+      printf("username of user connected: %s\n", SHM[id].username);
       subserver_listen(id,queue[WRITE]);
       // this shouldn't be necessary but if subserver_listen returns we shouldn't let it continue on to become an extra main server that'd be bad
       exit(0);
@@ -240,6 +242,7 @@ int server_connect(int sd){
   exit_err(client_socket, "server accept");
 
   printf("[server] client accepted\n");
+  //is returning the descriptor of the socket
   return client_socket;
 }
 
