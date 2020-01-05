@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <string.h>
+#include <fcntl.h>
+
 
 #include "err.h"
 #include "client.h"
@@ -35,6 +37,10 @@ int main(int argc, char *argv[]){
   *(strchr(cnx_info.username,'\n')) = '\0'; // eliminate newline
   cnx_info.room = 0;
 
+  //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
+  if (create_log()){
+    printf("uh oh, create_log malfunctioned\n");
+  }
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
@@ -59,6 +65,8 @@ int main(int argc, char *argv[]){
       // get the message, remove the newline
       fgets(packet.CHATMSG.message,80,stdin);
       *strchr(packet.CHATMSG.message,'\n') = '\0';
+      //remember to re-add that \n when you add this line to your log.txt ^^
+
       // configure header to contain proper information about the packet
       header.packet_type = P_CHATMSG;
       header.packet_size = sizeof(struct chatmsg);
@@ -79,6 +87,13 @@ int main(int argc, char *argv[]){
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       printf("message: [%s]\n",packet.CHATMSG.message);
+      //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
+      r = update_log(packet.CHATMSG.message);
+      if (r != 0){
+        printf("update_log not working\n");
+      }
+      //print and reprint below
+
     }
   }
   return 0;
@@ -116,4 +131,22 @@ void reset_fdset(fd_set *set,int sd){
   FD_ZERO(set);
   FD_SET(STDIN_FILENO,set);
   FD_SET(sd,set);
+}
+
+int update_log(char *addition){
+  int fd = open("log.txt", O_WRONLY | O_APPEND);
+  int len_write = strlen(addition);
+  exit_err(fd, "tried opening update_log");
+  strcat(addition, "\n");
+  write(fd, addition, len_write);
+  exit_err(close(fd), "couldn't close log.txt in update_log");
+  return 0;
+}
+
+int create_log(){
+  //only the user shld be able to interact w log
+  //also, i don't want to recreate the log if for somereason client runs main over again
+  int fd = open("log.txt", O_CREAT | O_EXCL, 0600);
+  exit_err(close(fd), "couldn't close log.txt in create_log");
+  return 0;
 }

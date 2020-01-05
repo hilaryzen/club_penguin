@@ -14,7 +14,19 @@ int client_setup(char *server);
 Will add any message sent out or recieved to your chat log file
 Later, develop method to display the log on screen
 Later later, develop scrolling
+
+0 on success
 */
-int update_log(chat *addition);
+int update_log(char *addition);
+
+/*
+makes log.txt, which is updated every time you recieve a message
+additions should be in this format:
+(username): message \n
+
+0 on success
+*/
+int create_log();
+
 
 #endif
