@@ -18,3 +18,8 @@ kiranV -- 2020-01-04 21:30
 kiranV -- 2020-01-05 09:00
    -fixed bugs surrounding ID's and identifying empty spaces in the shared memory, as well as a couple others; all seems to be working with the server structure!
    -clean(ing) up and comment(ing) code to make it not so nightmarish to read
+   -remaining bugs:
+       -weird interrupts when a user is in the middle of typing and a message is received
+       -sockets are not closed in the main server when a user disconnects
+       -still need to add shared memory for the actual game state
+       -clientside print statements are weird to say the least
