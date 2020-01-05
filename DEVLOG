@@ -11,3 +11,10 @@ kiranV -- 2020-01-03 15:50
 
 kiranV -- 2020-01-04 07:52
    -finished a theoretically working server, along with signal handling for a clean exit upon ^C; largely untested because there is no working client yet
+
+kiranV -- 2020-01-04 21:30
+   -created a basic select client to send chat type messages to the server, revealed a whole lot of bugs in the server code from this morning and fixed some of them
+
+kiranV -- 2020-01-05 09:00
+   -fixed bugs surrounding ID's and identifying empty spaces in the shared memory, as well as a couple others; all seems to be working with the server structure!
+   -clean(ing) up and comment(ing) code to make it not so nightmarish to read
