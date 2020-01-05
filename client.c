@@ -28,10 +28,6 @@ int main(int argc, char *argv[]){
   printf("[client] about to write a header\n");
   write(sd,&cnx_info,sizeof(struct cnx_header));
   printf("[client] wrote a header\n");
-  char c = '1';
-  write(sd,&c,1);
-  c = '2';
-  write(sd,&c,1);
   while (1) {
     printf("enter data: ");
     fflush(stdout);

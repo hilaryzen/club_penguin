@@ -52,11 +52,7 @@ int main(){
     SHM[id].id = id;
     SHM[id].sd = client_sd;
     sem_release(SEMD,SHM_SEMA);
-    printf("shared memory for id %d configured: sd = %d\n",SHM[id].id,SHM[id].sd);
-    char c;
     f = fork();
-    read(client_sd,&c,1);
-    printf("[%d (f=%d)] got %c\n",getpid(),f,c);
     if(!f){
       signal(SIGTERM,subserver_sighandler);
       signal(SIGINT,subserver_sighandler);
@@ -90,10 +86,13 @@ void process_queue(int qd){
     printf("[queue handler %d] handling packet\n",getpid());
     read(qd,&packet,header.packet_size);
     for( i=0; i<MAX_CNX; i++ ){
-      if( should_receive(SHM+i,&header,&packet) ){
+      printf("[%d]: id=%d, sd=%d",i,SHM[i].id,SHM[i].sd);
+      if( SHM[i].id==i && should_receive(SHM+i,&header,&packet) ){
+	printf(": writing\n");
 	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
 	write( SHM[i].sd, &packet, header.packet_size );
       }
+      printf("\n");
     }
   }
 }
@@ -104,22 +103,17 @@ void subserver_listen(int id,int qd){
   printf("[subserver %d] ready to listen: id %d(%d), sd %d\n",getpid(),SHM[id].id,id,SHM[id].sd);
   while( r = read(SHM[id].sd,&header,sizeof( struct packet_header )) ){
     exit_err(r,"socket read");
-    printf("return value: %d\n",r);
     if( r != sizeof(struct packet_header) ){
-      printf("smol\n");
       exit(0);
     }
     printf("[subserver %d] received a packet\n",getpid());
     read(SHM[id].sd,&packet,header.packet_size);
     process(SHM+id,&header,&packet,qd);
-    sleep(2);
-    printf("\n\n\nqd: %d\n\n\n",qd);
   }
   printf("[subserver %d] eof reached\n",getpid());
 }
 
 void qwrite(struct packet_header *header,union packet *packet, int qd){
-  printf("\n\n[qwrite]\n");
   sem_claim(SEMD,QUEUE_SEMA);
   write( qd, header, sizeof( struct packet_header ) );
   write( qd, packet, header->packet_size );
@@ -129,7 +123,7 @@ void qwrite(struct packet_header *header,union packet *packet, int qd){
 int clean_id(){
   /* should not be used without having first gotten the sem! ! ! */
   int i = 0;
-  while( i < MAX_CNX && SHM[i].id ) i++;
+  while( i < MAX_CNX && SHM[i].id==i ) i++;
   return i==MAX_CNX ? -1 : i;
 }
 

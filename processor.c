@@ -7,7 +7,6 @@
 
 
 void process( struct cnx_header *cnx_info, struct packet_header *header, union packet *packet , int qd){
-  printf("\n\n[processor]\n");
   qwrite(header, packet,qd);
 }
 
