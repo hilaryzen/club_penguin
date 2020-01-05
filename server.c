@@ -44,22 +44,24 @@ int main(){
   while (1) {
     int client_sd = server_connect(listen_socket);
     struct cnx_header cnx_info;
-    read(client_sd,&cnx_info,sizeof(struct cnx_header));
+    r = read(client_sd,&cnx_info,sizeof(struct cnx_header));
+    exit_err(r,"read cnx header");
     sem_claim(SEMD,SHM_SEMA);
     int id = clean_id();
     SHM[id] = cnx_info;
     SHM[id].id = id;
     SHM[id].sd = client_sd;
     sem_release(SEMD,SHM_SEMA);
+    printf("shared memory for id %d configured: sd = %d\n",SHM[id].id,SHM[id].sd);
+    char c;
     f = fork();
+    read(client_sd,&c,1);
+    printf("[%d (f=%d)] got %c\n",getpid(),f,c);
     if(!f){
       signal(SIGTERM,subserver_sighandler);
       signal(SIGINT,subserver_sighandler);
       child_init_ipc();
       close(queue[READ]);
-      for( i=0; i<MAX_CNX; i++ ){
-	if( i!=id ) close(SHM[i].sd);
-      }
       printf("[subserver %d] about to listen\n",getpid());
       subserver_listen(id,queue[WRITE]);
       exit(0);
@@ -177,6 +179,7 @@ int server_connect(int sd){
   client_socket = accept(sd, (struct sockaddr *)&client_address, &sock_size);
   exit_err(client_socket, "server accept");
   printf("[server] client accepted\n");
+  return client_socket;
 }
 
 void main_sighandler(int signal){
