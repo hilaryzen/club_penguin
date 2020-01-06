@@ -38,3 +38,9 @@ almaT -- 2020-01-05 18:57
 almaT -- 2020-01-06 0:23
     -to try to fix aformentioned issue, created "touch_log" var in client. if multiple clients from same directory, only one 
      has it set to true. issue now is only messages sent by that special client are written into the log
+
+almaT -- 2020-01-06 10:57
+    -NOTE TO SELF: started making it so cnx_info is sent to client too, so you can see who sent which message. 
+     note that i just put write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); in process_queue; issue is cnx_info isn't passed
+     from main function to process_queue; so pass it? or make client send it? not suer which to choose (b/c they'd be sending their info 
+     every time they send a message when we keep that info the second they make a connection
