@@ -22,4 +22,4 @@ err.o: err.c err.h
 	gcc $(CFLAGS) -c err.c
 
 clean:
-	rm server client *.o *~ \#*
+	rm server client *.txt *.o *~ \#* 
