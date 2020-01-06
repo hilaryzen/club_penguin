@@ -17,7 +17,7 @@ Later later, develop scrolling
 
 0 on success
 */
-int update_log(char *addition);
+int update_log(char *addition, char *who_sent);
 
 /*
 makes log.txt, which is updated every time you recieve a message

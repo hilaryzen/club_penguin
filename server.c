@@ -123,9 +123,14 @@ void process_queue(int qd){
       /* foreach connection space:
 	     if there is a connection in this space and it should receive this packet,
 	     then write the packet to its socket */
+       //Alma -- im adding sending the username of whoever sent this message so it can
+       //be added to the log
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
-	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
-	write( SHM[i].sd, &packet, header.packet_size );
+      	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
+        //
+        write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); //not sure how to get j the username from this
+        //
+        write( SHM[i].sd, &packet, header.packet_size );
       }
     }
   }

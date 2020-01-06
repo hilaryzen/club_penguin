@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
   struct packet_header header;
   union packet packet;
   struct cnx_header cnx_info; // struct which contains information about our connection
-
+  struct cnx_header cnx_who_sent;
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -80,6 +80,9 @@ int main(int argc, char *argv[]){
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
+    //alma edit -- i want the server to send cnx_info packet too so we can make log look like:
+    //username: hey!
+    //username2: sup?
     if (FD_ISSET(sd,&readset)) {
       printf("[client] received packet from server\n");
       r = read(sd,&header,sizeof(struct packet_header));
@@ -88,12 +91,16 @@ int main(int argc, char *argv[]){
 	       printf("eof i think\n");
 	        exit(0);
       }
+      //get info of who sent
+      read(sd, &cnx_who_sent, sizeof(struct cnx_header));
+      char * who_sent = cnx_who_sent.username;
+      //
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
       if (touch_log){
-        r = update_log(packet.CHATMSG.message);
+        r = update_log(packet.CHATMSG.message, who_sent);
         if (r != 0){
           printf("update_log not working\n");
         }
@@ -139,11 +146,14 @@ void reset_fdset(fd_set *set,int sd){
   FD_SET(sd,set);
 }
 
-int update_log(char *addition){
+int update_log(char *addition, char *who_sent){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
   exit_err(fd, "tried opening update_log");
+  strcat(who_sent, ":\t");
+  int len_write = strlen(who_sent);
+  write(fd, who_sent, len_write);
   strcat(addition, "\n");
-  int len_write = strlen(addition); //so this should also add the \n 
+  len_write = strlen(addition); //so this should also add the \n
   write(fd, addition, len_write);
   exit_err(close(fd), "couldn't close log.txt in update_log");
   return 0;
