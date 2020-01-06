@@ -141,9 +141,9 @@ void reset_fdset(fd_set *set,int sd){
 
 int update_log(char *addition){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
-  int len_write = strlen(addition);
   exit_err(fd, "tried opening update_log");
   strcat(addition, "\n");
+  int len_write = strlen(addition); //so this should also add the \n 
   write(fd, addition, len_write);
   exit_err(close(fd), "couldn't close log.txt in update_log");
   return 0;
