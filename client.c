@@ -13,6 +13,8 @@
 #include "client.h"
 #include "packets.h"
 
+int touch_log = 1;
+
 int main(int argc, char *argv[]){
 
   // DECLARATIONS
@@ -39,7 +41,9 @@ int main(int argc, char *argv[]){
 
   //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
   if (create_log()){
-    printf("uh oh, create_log malfunctioned\n");
+    //if this fails, change touch_log to 0 so we don't update a log that isn't existing
+    touch_log = 0;
+    printf("uh oh, create_log malfunctioned -- touch_log = 0\n");
   }
   // CONNECT TO THE SERVER
   sd = client_setup(host);
@@ -88,9 +92,11 @@ int main(int argc, char *argv[]){
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
-      r = update_log(packet.CHATMSG.message);
-      if (r != 0){
-        printf("update_log not working\n");
+      if (touch_log){
+        r = update_log(packet.CHATMSG.message);
+        if (r != 0){
+          printf("update_log not working\n");
+        }
       }
       //print and reprint below
 
@@ -147,6 +153,8 @@ int create_log(){
   //only the user shld be able to interact w log
   //also, i don't want to recreate the log if for somereason client runs main over again
   int fd = open("log.txt", O_CREAT | O_EXCL, 0600);
-  exit_err(close(fd), "couldn't close log.txt in create_log");
+  if (fd == -1){
+    return 1; //so if this file already exists (2+ clients in same direcotry), don't make it again
+  }
   return 0;
 }

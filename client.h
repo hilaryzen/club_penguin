@@ -25,6 +25,8 @@ additions should be in this format:
 (username): message \n
 
 0 on success
+
+IF LOG ALREADY EXISTS SHOULD SET A FLAG 'TOUCHING LOG' TO FALSE! AKA 0 -- THAT WAY ONLY 1 CLIENT HAS TO AFFECT LOG
 */
 int create_log();
 
