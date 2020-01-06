@@ -23,3 +23,18 @@ kiranV -- 2020-01-05 09:00
        -sockets are not closed in the main server when a user disconnects
        -still need to add shared memory for the actual game state
        -clientside print statements are weird to say the least
+       
+almaT -- 2020-01-05 13:27
+   -began looking through Kiran's server and planning out how to modify how chat appears on terminal
+   -right now filling this out because I forgot how to set a branch upstream
+
+almaT -- 2020-01-05 18:57
+    -started creating chat log
+    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the 
+     chat as a text file, but my 2 clients can't access it at the same time bc they share the same directory (i think if
+     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer. 
+     I should implement some sort of check that decides
+
+almaT -- 2020-01-06 0:23
+    -to try to fix aformentioned issue, created "touch_log" var in client. if multiple clients from same directory, only one 
+     has it set to true. issue now is only messages sent by that special client are written into the log
