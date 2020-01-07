@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
   struct packet_header header;
   union packet packet;
   struct cnx_header cnx_info; // struct which contains information about our connection
-  struct cnx_header cnx_who_sent; //used with update_log 
+  struct cnx_header cnx_who_sent; //used with update_log
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -149,7 +149,7 @@ void reset_fdset(fd_set *set,int sd){
 int update_log(char *addition, char *who_sent){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
   exit_err(fd, "tried opening update_log");
-  strcat(who_sent, ":\t");
+  strcat(who_sent, "\e[%d;%df%s:\t");
   int len_write = strlen(who_sent);
   write(fd, who_sent, len_write);
   strcat(addition, "\n");
