@@ -12,6 +12,7 @@
 #include "err.h"
 #include "client.h"
 #include "packets.h"
+#include "render.h"
 
 int touch_log = 1;
 
@@ -149,7 +150,13 @@ void reset_fdset(fd_set *set,int sd){
 int update_log(char *addition, char *who_sent){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
   exit_err(fd, "tried opening update_log");
-  strcat(who_sent, "\e[%d;%df%s:\t");
+  //so we can print penguin
+  int backup_stdout = dup(1);
+  dup2(fd, 1);
+  draw_penguin(2, 1);
+  dup2(backup_stdout, 1);
+  //
+  strcat(who_sent, ":\t");
   int len_write = strlen(who_sent);
   write(fd, who_sent, len_write);
   strcat(addition, "\n");
