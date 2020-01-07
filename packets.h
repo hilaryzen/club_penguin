@@ -11,6 +11,7 @@ enum packet_t {
 
 struct packet_header {
   int id;
+  char *username;
   int packet_size;
   enum packet_t packet_type;
 };

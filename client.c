@@ -72,6 +72,10 @@ int main(int argc, char *argv[]){
       //remember to re-add that \n when you add this line to your log.txt ^^
 
       // configure header to contain proper information about the packet
+
+      //alma adding that you fill in header to have username too
+      header.username = cnx_info.username;
+      //
       header.packet_type = P_CHATMSG;
       header.packet_size = sizeof(struct chatmsg);
       // write the header and packet to the server socket
@@ -93,7 +97,7 @@ int main(int argc, char *argv[]){
       printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
       if (touch_log){
-        r = update_log(packet.CHATMSG.message);
+        r = update_log(packet.CHATMSG.message, header.username);
         if (r != 0){
           printf("update_log not working\n");
         }
@@ -139,11 +143,14 @@ void reset_fdset(fd_set *set,int sd){
   FD_SET(sd,set);
 }
 
-int update_log(char *addition){
+int update_log(char *addition, char *who_sent){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
   exit_err(fd, "tried opening update_log");
+  strcat(who_sent, ": ");
+  int len_write = strlen(who_sent);
+  write(fd, who_sent, len_write);
   strcat(addition, "\n");
-  int len_write = strlen(addition); //so this should also add the \n
+  len_write = strlen(addition); //so this should also add the \n
   write(fd, addition, len_write);
   exit_err(close(fd), "couldn't close log.txt in update_log");
   return 0;
