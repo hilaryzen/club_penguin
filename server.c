@@ -97,14 +97,14 @@ int main(){
       child_init_ipc();
       // close the write end of this pipe since we will be reading from it in this process
       close(queue[WRITE]);
-      process_queue(queue[READ], id);
+      process_queue(queue[READ]);
       // shouldn't be reached but a safety net so no unexpected behavior is possible here
       exit(0);
     }
   }
   return 0;
 }
-//** i (alma) modified this so the cnx_info of who sent this goes w the message
+
 void process_queue(int qd){
   // OUTBOX QUEUE HANDLER PROCESS
   /* this process dispatches messages written to the outbox queue to users */
@@ -123,16 +123,9 @@ void process_queue(int qd){
       /* foreach connection space:
 	     if there is a connection in this space and it should receive this packet,
 	     then write the packet to its socket */
-       //Alma -- im adding sending the username of whoever sent this message so it can
-       //be added to the log
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
-      	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
-        //is this bad? sending thru the socket our struct (cnx_header) --> before sending this client's socket, now sending socket of who sent
-        //i get problem. this is sending message server got to client w that client's username
-        //instead need to get the username into the message in subserver_listen
-        write(SHM[i].sd, &SHM[header.id], sizeof( struct cnx_header)); //not sure how to get j the username from this
-        //
-        write( SHM[i].sd, &packet, header.packet_size );
+	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
+	write( SHM[i].sd, &packet, header.packet_size );
       }
     }
   }
