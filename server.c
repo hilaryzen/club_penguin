@@ -128,7 +128,7 @@ void process_queue(int qd, int id){
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
       	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
         //is this bad? sending thru the socket our struct (cnx_header)
-        write(SHM[i].sd, SHM[i], sizeof( struct cnx_header)); //not sure how to get j the username from this
+        write(SHM[i].sd, &SHM[i], sizeof( struct cnx_header)); //not sure how to get j the username from this
         //
         write( SHM[i].sd, &packet, header.packet_size );
       }
