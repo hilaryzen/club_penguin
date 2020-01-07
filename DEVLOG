@@ -40,7 +40,13 @@ almaT -- 2020-01-06 0:23
      has it set to true. issue now is only messages sent by that special client are written into the log
 
 almaT -- 2020-01-06 10:57
+    -fixed one-message issue from earlier.
     -NOTE TO SELF: started making it so cnx_info is sent to client too, so you can see who sent which message. 
      note that i just put write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); in process_queue; issue is cnx_info isn't passed
      from main function to process_queue; so pass it? or make client send it? not suer which to choose (b/c they'd be sending their info 
      every time they send a message when we keep that info the second they make a connection
+     
+almaT -- 2020-01-06 23:16
+    -So username is being written to file, but it's j the username of the client that can touch the file. I guess i'm getting the 
+    username in the wrong place (I though writing cnx_info in process_queue would mean that messages sent from almaLisa would
+    get tagged as such to almaBart, but it just seems like all messages are from almaBart)
