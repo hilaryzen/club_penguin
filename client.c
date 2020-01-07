@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
   struct packet_header header;
   union packet packet;
   struct cnx_header cnx_info; // struct which contains information about our connection
-  struct cnx_header cnx_who_sent;
+  struct cnx_header cnx_who_sent; //used with update_log 
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
       }
       //get info of who sent
       read(sd, &cnx_who_sent, sizeof(struct cnx_header));
-      char * who_sent = cnx_who_sent.username;
+      char *who_sent = cnx_who_sent.username;
       //
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary

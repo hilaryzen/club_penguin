@@ -97,15 +97,15 @@ int main(){
       child_init_ipc();
       // close the write end of this pipe since we will be reading from it in this process
       close(queue[WRITE]);
-      process_queue(queue[READ]);
+      process_queue(queue[READ], id);
       // shouldn't be reached but a safety net so no unexpected behavior is possible here
       exit(0);
     }
   }
   return 0;
 }
-
-void process_queue(int qd){
+//** i (alma) modified this so the cnx_info of who sent this goes w the message
+void process_queue(int qd, int id){
   // OUTBOX QUEUE HANDLER PROCESS
   /* this process dispatches messages written to the outbox queue to users */
   /* who the messages are sent to is determined by processor.c:should_receive() */
@@ -127,8 +127,8 @@ void process_queue(int qd){
        //be added to the log
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
       	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
-        //
-        write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); //not sure how to get j the username from this
+        //is this bad? sending thru the socket our struct (cnx_header)
+        write(SHM[i].sd, SHM[i], sizeof( struct cnx_header)); //not sure how to get j the username from this
         //
         write( SHM[i].sd, &packet, header.packet_size );
       }
