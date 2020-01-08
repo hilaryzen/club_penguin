@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
       // configure header to contain proper information about the packet
 
       //alma adding that you fill in header to have username too
-      header.username = cnx_info.username;
+      strcpy(header.username, cnx_info.username);
       //
       header.packet_type = P_CHATMSG;
       header.packet_size = sizeof(struct chatmsg);
