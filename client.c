@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <string.h> 
 #include <string.h>
 #include <fcntl.h>
 
