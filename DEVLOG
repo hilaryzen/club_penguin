@@ -23,30 +23,34 @@ kiranV -- 2020-01-05 09:00
        -sockets are not closed in the main server when a user disconnects
        -still need to add shared memory for the actual game state
        -clientside print statements are weird to say the least
-       
+
 almaT -- 2020-01-05 13:27
    -began looking through Kiran's server and planning out how to modify how chat appears on terminal
    -right now filling this out because I forgot how to set a branch upstream
 
 almaT -- 2020-01-05 18:57
     -started creating chat log
-    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the 
+    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the
      chat as a text file, but my 2 clients can't access it at the same time bc they share the same directory (i think if
-     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer. 
+     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer.
      I should implement some sort of check that decides
 
 almaT -- 2020-01-06 0:23
-    -to try to fix aformentioned issue, created "touch_log" var in client. if multiple clients from same directory, only one 
+    -to try to fix aformentioned issue, created "touch_log" var in client. if multiple clients from same directory, only one
      has it set to true. issue now is only messages sent by that special client are written into the log
 
 almaT -- 2020-01-06 10:57
     -fixed one-message issue from earlier.
-    -NOTE TO SELF: started making it so cnx_info is sent to client too, so you can see who sent which message. 
+    -NOTE TO SELF: started making it so cnx_info is sent to client too, so you can see who sent which message.
      note that i just put write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); in process_queue; issue is cnx_info isn't passed
-     from main function to process_queue; so pass it? or make client send it? not suer which to choose (b/c they'd be sending their info 
+     from main function to process_queue; so pass it? or make client send it? not suer which to choose (b/c they'd be sending their info
      every time they send a message when we keep that info the second they make a connection
-     
+
 almaT -- 2020-01-06 23:16
-    -So username is being written to file, but it's j the username of the client that can touch the file. I guess i'm getting the 
+    -So username is being written to file, but it's j the username of the client that can touch the file. I guess i'm getting the
     username in the wrong place (I though writing cnx_info in process_queue would mean that messages sent from almaLisa would
     get tagged as such to almaBart, but it just seems like all messages are from almaBart)
+
+hilaryZ -- 2020-01-08 01:31
+    -created sdl branch and wrote program to open a new window and allow the user to move a penguin around
+    -added separate main.c file and makefile in a folder, will work on combining this with the chat
