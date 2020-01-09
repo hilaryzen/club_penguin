@@ -53,24 +53,42 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
   scrollok(*print_errs, TRUE);
   wmove(*type_win, 1, 1); //set cursor
-
-  while(ch != KEY_F(1)){
+  char chars_pressed[128];
+  int i = 0;
+  while(1){
     ch = wgetch(*type_win); //get what the user puts down
+    chars_pressed[i] = ch;
+    i++;
     switch (ch){ //switch so we can add diff stuff later
       case KEY_UP:
+        wmove(*print_errs, 1, 1);
         wprintw(*print_errs, "key up\n");
+        wrefresh(*print_errs); //refresh the window
+        wmove(*type_win, 1, 1);
         break;
       case KEY_DOWN:
+        wmove(*print_errs, 1, 1);
         wprintw(*print_errs, "key down\n");
+        wrefresh(*print_errs); //refresh the window
+        wmove(*type_win, 1, 1);
         break;
       case KEY_LEFT:
+        wmove(*print_errs, 1, 1);
         wprintw(*print_errs, "key left\n");
+        wrefresh(*print_errs); //refresh the window
+        wmove(*type_win, 1, 1);
         break;
       case KEY_RIGHT:
+        wmove(*print_errs, 1, 1);
         wprintw(*print_errs, "key right\n");
+        wrefresh(*print_errs); //refresh the window
+        wmove(*type_win, 1, 1);
         break;
       case KEY_F(1):
+        wmove(*print_errs, 1, 1);
         wprintw(*print_errs, "f1 key\n");
+        wrefresh(*print_errs); //refresh the window
+        wmove(*type_win, 1, 1);
         return 0; //end the function
         break;
       default:
@@ -79,8 +97,8 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
         break;
     }
   } //if you press f1, this returns and main goes onto cleanup and end
-
-  wprintw(*print_errs, "broke out of while loop and returnin 0...\n");
+  wmove(*print_errs, 1, 1);
+  wprintw(*print_errs, "returning 0, broke out of loop somehow\n");
   return 0;
 }
 
