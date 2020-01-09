@@ -3,45 +3,19 @@
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
-//int mv_type();
+int setup(WINDOW **game_win, WINDOW **chat_window, WINDOW **type_win);
 
 int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
   WINDOW *type_win;
-	int startx, starty, width, height;
-	int ch;
-
-	initscr();			/* Start curses mode 		*/
-	cbreak();			/* Line buffering disabled, Pass on
-					 * everty thing to me 		*/
-	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
-
-	height = LINES - 2;
-	width = COLS / 2;
-	starty = 1;	/* Calculating for a center placement */
-	startx = 1;	/* of the window		*/
-	printw("Press F1 to exit");
-	refresh();
-	game_win = create_newwin(height, width, starty, startx);
-  height = LINES - 5;
-  width = COLS - (COLS / 2 + 3);
-  starty = 1;
-  startx = COLS / 2 + 2;
-  chat_win = create_newwin(height, width, starty, startx);
-  height = 3;
-  width = COLS - (COLS / 2 + 3);
-  starty = LINES - 4;
-  startx = COLS / 2 + 2;
-  type_win = create_newwin(height, width, starty, startx);
-
-
+  int ch;
+  setup(&game_win, &chat_win, &type_win);
 	while((ch = getch()) != KEY_F(1))
 	{
     wmove(type_win, 1, 1);
     wrefresh(type_win);
 	}
-
 	endwin();			/* End curses mode		  */
 	return 0;
 }
@@ -55,6 +29,35 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	wrefresh(local_win);		/* Show that box 		*/
 
 	return local_win;
+}
+
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
+	int startx, starty, width, height;
+
+	initscr();			/* Start curses mode 		*/
+	cbreak();			/* Line buffering disabled, Pass on
+					 * everty thing to me 		*/
+  noecho(); //so that what you type doesn't show up on the screen
+	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
+
+	height = LINES - 2;
+	width = COLS / 2;
+	starty = 1;	/* Calculating for a center placement */
+	startx = 1;	/* of the window		*/
+	printw("Press F1 to exit");
+	refresh();
+	*game_win = create_newwin(height, width, starty, startx);
+  height = LINES - 5;
+  width = COLS - (COLS / 2 + 3);
+  starty = 1;
+  startx = COLS / 2 + 2;
+  *chat_win = create_newwin(height, width, starty, startx);
+  height = 3;
+  width = COLS - (COLS / 2 + 3);
+  starty = LINES - 4;
+  startx = COLS / 2 + 2;
+  *type_win = create_newwin(height, width, starty, startx);
+  return 0; //just to show that it works
 }
 
 void destroy_win(WINDOW *local_win)
