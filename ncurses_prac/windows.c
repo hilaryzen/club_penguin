@@ -1,21 +1,36 @@
 #include <ncurses.h>
-
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
-int setup(WINDOW **game_win, WINDOW **chat_window, WINDOW **type_win);
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
+int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
+int read_from_type(WINDOW **type_win);
 
 int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
   WINDOW *type_win;
   int ch;
-  setup(&game_win, &chat_win, &type_win);
+  if (setup(&game_win, &chat_win, &type_win)){
+    printf("uh oh, setup failed\n");
+  }
+  /*
 	while((ch = getch()) != KEY_F(1))
 	{
     wmove(type_win, 1, 1);
     wrefresh(type_win);
 	}
+  */
+  if (read_from_type(&type_win)){
+    printf("uh oh, can't read from type window!\n");
+  }
+  if (cleanup(&game_win, &chat_win, &type_win)){
+    printf("uh oh, cleanup failed\n");
+  }
+  //sleep(2); just did this to test that cleanup works
 	endwin();			/* End curses mode		  */
 	return 0;
 }
@@ -31,6 +46,22 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
+int read_from_type(WINDOW **type_win){
+  //remember we are catching special keys, called keypad(stdstr, TRUE) in setup
+  chtype ch = ' ';
+  scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  wmove(*type_win, 1, 1);
+  while(ch != KEY_F(1)){
+    if(ch!=KEY_UP && ch!=KEY_DOWN && ch!= KEY_LEFT && ch!=KEY_RIGHT){
+      ch = wgetch(*type_win); //get what the user puts down
+      waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+      wrefresh(*type_win); //refresh the window
+    }
+    //else ignore it
+  } //if you press f1, this returns and main goes onto cleanup and end
+  return 0;
+}
+
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	int startx, starty, width, height;
 
@@ -40,6 +71,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   noecho(); //so that what you type doesn't show up on the screen
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 
+  //our three boxes
 	height = LINES - 2;
 	width = COLS / 2;
 	starty = 1;	/* Calculating for a center placement */
@@ -57,11 +89,18 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   starty = LINES - 4;
   startx = COLS / 2 + 2;
   *type_win = create_newwin(height, width, starty, startx);
+
   return 0; //just to show that it works
 }
 
-void destroy_win(WINDOW *local_win)
-{
+int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
+  destroy_win(*game_win);
+  destroy_win(*chat_win);
+  destroy_win(*type_win);
+  return 0;
+}
+
+void destroy_win(WINDOW *local_win){
 	/* box(local_win, ' ', ' '); : This won't produce the desired
 	 * result of erasing the window. It will leave it's four corners
 	 * and so an ugly remnant of window.
