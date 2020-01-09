@@ -54,3 +54,7 @@ almaT -- 2020-01-06 23:16
 hilaryZ -- 2020-01-08 01:31
     -created sdl branch and wrote program to open a new window and allow the user to move a penguin around
     -added separate main.c file and makefile in a folder, will work on combining this with the chat
+
+hilaryZ -- 2020-01-09 00:58
+    -added test files using ncurses to sdl_practice folder on the sdl branch
+    -created layout of three windows that will contain the user's game, chat, and message being typed
