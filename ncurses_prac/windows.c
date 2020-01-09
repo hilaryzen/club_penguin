@@ -7,7 +7,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int read_from_type(WINDOW **type_win);
+int read_from_type(WINDOW **type_win, WINDOW **print_errs);
 
 int main(int argc, char *argv[]){
   WINDOW *game_win;
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
     wrefresh(type_win);
 	}
   */
-  if (read_from_type(&type_win)){
+  if (read_from_type(&type_win, &chat_win)){
     printf("uh oh, can't read from type window!\n");
   }
   if (cleanup(&game_win, &chat_win, &type_win)){
@@ -46,19 +46,41 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win){
+int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   //remember we are catching special keys, called keypad(stdstr, TRUE) in setup
-  chtype ch = ' ';
+  int ch = ' ';
+
   scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
-  wmove(*type_win, 1, 1);
+  scrollok(*print_errs, TRUE);
+  wmove(*type_win, 1, 1); //set cursor
+
   while(ch != KEY_F(1)){
-    if(ch!=KEY_UP && ch!=KEY_DOWN && ch!= KEY_LEFT && ch!=KEY_RIGHT){
-      ch = wgetch(*type_win); //get what the user puts down
-      waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-      wrefresh(*type_win); //refresh the window
+    ch = wgetch(*type_win); //get what the user puts down
+    switch (ch){ //switch so we can add diff stuff later
+      case KEY_UP:
+        wprintw(*print_errs, "key up\n");
+        break;
+      case KEY_DOWN:
+        wprintw(*print_errs, "key down\n");
+        break;
+      case KEY_LEFT:
+        wprintw(*print_errs, "key left\n");
+        break;
+      case KEY_RIGHT:
+        wprintw(*print_errs, "key right\n");
+        break;
+      case KEY_F(1):
+        wprintw(*print_errs, "f1 key\n");
+        return 0; //end the function
+        break;
+      default:
+        waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+        wrefresh(*type_win); //refresh the window
+        break;
     }
-    //else ignore it
   } //if you press f1, this returns and main goes onto cleanup and end
+
+  wprintw(*print_errs, "broke out of while loop and returnin 0...\n");
   return 0;
 }
 
