@@ -24,7 +24,7 @@ struct cnx_header {
 };
 
 struct chatmsg {
-  char message[80];
+  char message[128];
 };
 
 struct playermove {

@@ -52,50 +52,66 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   keypad(*type_win, TRUE);
   scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
   scrollok(*print_errs, TRUE);
-  wmove(*type_win, 1, 1); //set cursor
-  char chars_pressed[128];
+  wmove(*type_win, 0, 0); //set cursor
+  char message[128];
   int i = 0;
   while(1){
     ch = wgetch(*type_win); //get what the user puts down
-    chars_pressed[i] = ch;
-    i++;
-    switch (ch){ //switch so we can add diff stuff later
-      case KEY_UP:
-        wmove(*print_errs, 1, 1);
-        wprintw(*print_errs, "key up\n");
-        wrefresh(*print_errs); //refresh the window
-        wmove(*type_win, 1, 1);
-        break;
-      case KEY_DOWN:
-        wmove(*print_errs, 1, 1);
-        wprintw(*print_errs, "key down\n");
-        wrefresh(*print_errs); //refresh the window
-        wmove(*type_win, 1, 1);
-        break;
-      case KEY_LEFT:
-        wmove(*print_errs, 1, 1);
-        wprintw(*print_errs, "key left\n");
-        wrefresh(*print_errs); //refresh the window
-        wmove(*type_win, 1, 1);
-        break;
-      case KEY_RIGHT:
-        wmove(*print_errs, 1, 1);
-        wprintw(*print_errs, "key right\n");
-        wrefresh(*print_errs); //refresh the window
-        wmove(*type_win, 1, 1);
-        break;
-      case KEY_F(1):
-        wmove(*print_errs, 1, 1);
-        wprintw(*print_errs, "f1 key\n");
-        wrefresh(*print_errs); //refresh the window
-        wmove(*type_win, 1, 1);
-        return 0; //end the function
-        break;
-      default:
-        waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-        //waddch(*type_win, ' ');
-        wrefresh(*type_win); //refresh the window
-        break;
+    if (i < 126 && ch != '\n'){
+      switch (ch){ //switch so we can add diff stuff later
+        case KEY_UP:
+          wmove(*print_errs, 1, 1);
+          wprintw(*print_errs, "key up");
+          wrefresh(*print_errs); //refresh the window
+          wmove(*type_win, 0, i+1);
+          break;
+        case KEY_DOWN:
+          wmove(*print_errs, 1, 1);
+          wprintw(*print_errs, "key down");
+          wrefresh(*print_errs); //refresh the window
+          wmove(*type_win, 0, i+1);
+          break;
+        case KEY_LEFT:
+          wmove(*print_errs, 1, 1);
+          wprintw(*print_errs, "key left");
+          wrefresh(*print_errs); //refresh the window
+          wmove(*type_win, 0, i+1);
+          break;
+        case KEY_RIGHT:
+          wmove(*print_errs, 1, 1);
+          wprintw(*print_errs, "key right");
+          wrefresh(*print_errs); //refresh the window
+          wmove(*type_win, 0, i+1);
+          break;
+        case KEY_F(1):
+          wmove(*print_errs, 1, 1);
+          wprintw(*print_errs, "f1 key\n");
+          wrefresh(*print_errs); //refresh the window
+          wmove(*type_win, 1, 1);
+          return 0; //end the function
+          break;
+        default:
+          message[i] = ch;
+          i++;
+          waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+          //waddch(*type_win, ' ');
+          wrefresh(*type_win); //refresh the window
+          break;
+        }
+    }else if (ch == '\n'){
+      // initiate chat sending process
+      //networking stuff
+      werase(*type_win);
+      //DONT redraw the box
+      //just for checking, print message
+      wmove(*print_errs, 1, 1);
+      wprintw(*print_errs, message);
+      wrefresh(*print_errs);
+      //and clear it
+
+      wrefresh(*type_win);
+    }else if (i == 126){
+      // keep going until they press enter those fools
     }
   } //if you press f1, this returns and main goes onto cleanup and end
   wmove(*print_errs, 1, 1);
@@ -130,6 +146,11 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   starty = LINES - 4;
   startx = COLS / 2 + 2;
   *type_win = create_newwin(height, width, starty, startx);
+  //we don't need the box so let's erase
+  werase(*type_win);
+  //DONT redraw the box
+  wrefresh(*type_win);
+  // // //don't need box for type
 
   return 0; //just to show that it works
 }

@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <netdb.h>
-#include <string.h> 
+#include <string.h>
 #include <string.h>
 #include <fcntl.h>
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       // get the message, remove the newline
-      fgets(packet.CHATMSG.message,80,stdin);
+      fgets(packet.CHATMSG.message,128,stdin);
       *strchr(packet.CHATMSG.message,'\n') = '\0';
       //remember to re-add that \n when you add this line to your log.txt ^^
 
