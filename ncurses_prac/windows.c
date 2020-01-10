@@ -49,7 +49,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   //remember we are catching special keys, called keypad(stdstr, TRUE) in setup
   int ch = ' ';
-
+  keypad(*type_win, TRUE);
   scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
   scrollok(*print_errs, TRUE);
   wmove(*type_win, 1, 1); //set cursor
@@ -93,6 +93,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
         break;
       default:
         waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+        //waddch(*type_win, ' ');
         wrefresh(*type_win); //refresh the window
         break;
     }
