@@ -2,7 +2,7 @@
 
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
-void destroy_win(WINDOW *local_win);
+void display_A(WINDOW *game_win, WINDOW *type_win, int y, int x, int y_move, int x_move);
 
 int main(int argc, char *argv[])
 {	WINDOW *game_win;
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	width = COLS / 2;
 	starty = 1;	/* Calculating for a center placement */
 	startx = 1;	/* of the window		*/
-	printw("Press F1 to exit");
+	printw("Press Escape to switch between windows and F1 to exit");
 	refresh();
 	game_win = create_newwin(height, width, starty, startx);
   height = LINES - 5;
@@ -33,27 +33,41 @@ int main(int argc, char *argv[])
   starty = LINES - 4;
   startx = COLS / 2 + 2;
   type_win = create_newwin(height, width, starty, startx);
+  int y = LINES / 2; //Position of A
+  int x = COLS / 4;
+  display_A(game_win, type_win, y, x, 0, 0);
+  /*
+  wmove(game_win, 1, 1); //Moves cursor to game window
+  mvwprintw(game_win, (LINES / 2), (COLS / 4), "A"); //Prints A in the middle of the game window
+  wmove(type_win, 1, 1); //Moves cursor back to type window
+  wrefresh(game_win);
+  wrefresh(type_win);
+  */
 
 
 	while((ch = getch()) != KEY_F(1))
-	{	/*switch(ch)
+	{	switch(ch)
 		{	case KEY_LEFT:
-				destroy_win(game_win);
-				my_win = create_newwin(height, width, starty,--startx);
+        display_A(game_win, type_win, y, x, 0, -1);
+        x--;
 				break;
 			case KEY_RIGHT:
-				destroy_win(my_win);
-				my_win = create_newwin(height, width, starty,++startx);
+        display_A(game_win, type_win, y, x, 0, 1);
+        x++;
 				break;
 			case KEY_UP:
-				destroy_win(my_win);
-				my_win = create_newwin(height, width, --starty,startx);
-				break;
+        display_A(game_win, type_win, y, x, -1, 0);
+        y--;
+        break;
 			case KEY_DOWN:
-				destroy_win(my_win);
-				my_win = create_newwin(height, width, ++starty,startx);
+        display_A(game_win, type_win, y, x, 1, 0);
+        y++;
 				break;
-		}*/
+      case 27: //Escape key
+        wmove(game_win, 1, 1);
+        wrefresh(game_win);
+        break;
+		}
 	}
 
 	endwin();			/* End curses mode		  */
@@ -72,24 +86,10 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 	return local_win;
 }
 
-void destroy_win(WINDOW *local_win)
-{
-	/* box(local_win, ' ', ' '); : This won't produce the desired
-	 * result of erasing the window. It will leave it's four corners
-	 * and so an ugly remnant of window.
-	 */
-	wborder(local_win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
-	/* The parameters taken are
-	 * 1. win: the window on which to operate
-	 * 2. ls: character to be used for the left side of the window
-	 * 3. rs: character to be used for the right side of the window
-	 * 4. ts: character to be used for the top side of the window
-	 * 5. bs: character to be used for the bottom side of the window
-	 * 6. tl: character to be used for the top left corner of the window
-	 * 7. tr: character to be used for the top right corner of the window
-	 * 8. bl: character to be used for the bottom left corner of the window
-	 * 9. br: character to be used for the bottom right corner of the window
-	 */
-	wrefresh(local_win);
-	delwin(local_win);
+void display_A(WINDOW *game_win, WINDOW *type_win, int y, int x, int y_move, int x_move) {
+  mvwprintw(game_win, y, x, " "); //Prints A in the middle of the game window
+  mvwprintw(game_win, y + y_move, x + x_move, "A");
+  wmove(type_win, 1, 1); //Moves cursor back to type window
+  wrefresh(game_win);
+  wrefresh(type_win);
 }
