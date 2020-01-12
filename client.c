@@ -8,13 +8,19 @@
 #include <string.h>
 #include <string.h>
 #include <fcntl.h>
-
+#include <ncurses.h>
 
 #include "err.h"
 #include "client.h"
 #include "packets.h"
 
 int touch_log = 1;
+
+WINDOW *create_newwin(int height, int width, int starty, int startx);
+void destroy_win(WINDOW *local_win);
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
+int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
+int read_from_type(WINDOW **type_win, WINDOW **print_errs);
 
 int main(int argc, char *argv[]){
 
