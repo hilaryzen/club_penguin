@@ -13,14 +13,9 @@
 #include "err.h"
 #include "client.h"
 #include "packets.h"
+#include "windowing.h"
 
 int touch_log = 1;
-
-WINDOW *create_newwin(int height, int width, int starty, int startx);
-void destroy_win(WINDOW *local_win);
-int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int read_from_type(WINDOW **type_win, WINDOW **print_errs);
 
 int main(int argc, char *argv[]){
 
@@ -58,6 +53,24 @@ int main(int argc, char *argv[]){
   write(sd,&cnx_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
 
+  // WINDOWING SETUP
+    //remember we are catching special keys, called keypad(win, TRUE) in setup
+  WINDOW *game_win;
+  WINDOW *chat_win;
+  WINDOW *type_win;
+  if (setup(&game_win, &chat_win, &type_win)){
+    printf("uh oh, setup failed\n");
+  }
+  
+  int ch = ' ';
+  keypad(type_win, TRUE);
+  scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  scrollok(chat_win, TRUE);
+  wmove(type_win, 0, 0); //set cursor
+  char message[128];
+  int chat_ind = 0;
+
+  
   // forever loop: as data comes in, interpret keyboard input or server messages
   while (1) {
     // 1. PRINT CURRENT STATE
@@ -73,21 +86,7 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      // get the message, remove the newline
-      fgets(packet.CHATMSG.message,128,stdin);
-      *strchr(packet.CHATMSG.message,'\n') = '\0';
-      //remember to re-add that \n when you add this line to your log.txt ^^
-
-      // configure header to contain proper information about the packet
-
-      //alma adding that you fill in header to have username too
-      strcpy(header.username, cnx_info.username);
-      //
-      header.packet_type = P_CHATMSG;
-      header.packet_size = sizeof(struct chatmsg);
-      // write the header and packet to the server socket
-      write(sd,&header,sizeof(struct packet_header));
-      write(sd,&packet,sizeof(struct chatmsg));
+      read_from_type(&type_win,&chat_win,&chat_ind,message);
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
@@ -113,6 +112,8 @@ int main(int argc, char *argv[]){
 
     }
   }
+  wmove(chat_win, 1, 1);
+  wprintw(chat_win, "returning 0, broke out of loop somehow\n");
   return 0;
 }
 
