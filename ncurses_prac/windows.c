@@ -115,7 +115,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
       //wrefresh(*print_errs);
       //and clear it
       message[i] = ch; //add new line to message
-      add_to_log(message, i); //we use i to see if write fails
+      add_to_log(message, i+1); //we use i to see if write fails
       print_log(print_errs);//print the log to the chat window
       message[i] = ' ';
       i = 0; //reset the message
@@ -154,10 +154,10 @@ int print_log(WINDOW **log_window){
     printf("can't open log.txt in print_log\n");
   }
   int ret_read = 1; //end the while loop when read returns that it's read 0 bytes
-  char *buf; //to put on screen
+  char buf; //to put on screen
   while (ret_read){
-    ret_read = read(fd, buf, ret_read); //read in 1 char at a time
-    waddch(*log_window, *buf);
+    ret_read = read(fd, &buf, ret_read); //read in 1 char at a time
+    waddch(*log_window, buf);
     wrefresh(*log_window);
   }
   close(fd); //close when done
