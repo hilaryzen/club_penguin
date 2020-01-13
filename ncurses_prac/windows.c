@@ -148,7 +148,7 @@ int print_log(WINDOW **log_window){
   //wrefresh(*print_errs);
   werase(*log_window);
   wrefresh(*log_window);
-  wmove(*log_window, 1, 1);
+  wmove(*log_window, 1, 0);
   int fd = open("log.txt", O_RDONLY);
   if (fd == -1){
     printf("can't open log.txt in print_log\n");
@@ -178,8 +178,16 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	starty = 1;	/* Calculating for a center placement */
 	startx = 1;	/* of the window		*/
 	printw("Press F1 to exit");
+  //move cursor to middle and for height of screen draw vertical line
+  int pos = width; //xcor
+  int i = 0;
+  while (i < LINES){
+    mvaddch(i, pos, ACS_VLINE);
+    i++;
+  }
 	refresh();
-	*game_win = create_newwin(height, width, starty, startx);
+  //making room for the veritcal line
+	*game_win = create_newwin(height, width-1, starty, startx);
   height = LINES - 5;
   width = COLS - (COLS / 2 + 3);
   starty = 1;
