@@ -2,12 +2,18 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+
+
+//PATH = "log.txt"
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int read_from_type(WINDOW **type_win, WINDOW **print_errs);
+int add_to_log(char *message, int i); //if file doesn't already exist, will create
+int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh typing window after to move cursor
 
 int main(int argc, char *argv[]){
   WINDOW *game_win;
@@ -47,7 +53,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 }
 
 int read_from_type(WINDOW **type_win, WINDOW **print_errs){
-  //remember we are catching special keys, called keypad(stdstr, TRUE) in setup
+  //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = ' ';
   keypad(*type_win, TRUE);
   scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
@@ -104,12 +110,16 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
       werase(*type_win);
       //DONT redraw the box
       //just for checking, print message
-      wmove(*print_errs, 1, 1);
-      wprintw(*print_errs, message);
-      wrefresh(*print_errs);
+      //wmove(*print_errs, 1, 1);
+      //wprintw(*print_errs, message);
+      //wrefresh(*print_errs);
       //and clear it
-
-      wrefresh(*type_win);
+      message[i] = ch; //add new line to message
+      add_to_log(message, i+1); //we use i to see if write fails
+      print_log(print_errs);//print the log to the chat window
+      message[i] = ' ';
+      i = 0; //reset the message
+      wrefresh(*type_win); //move cursor back
     }else if (i == 126){
       // keep going until they press enter those fools
     }
@@ -119,6 +129,40 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   return 0;
 }
 
+int add_to_log(char *message, int i){
+  int fd = open("log.txt", O_WRONLY | O_CREAT | O_EXCL | O_APPEND, 0666);
+  if (fd == -1){
+    fd = open("log.txt", O_WRONLY | O_APPEND); //if it already exists, open w/o create
+  }
+  int check = write(fd, message, i);
+  if (check != i){
+    printf("not sure where on screen this is, but add_to_log not working\n");
+    return 1;
+  }
+  close(fd);
+  return 0;
+}
+int print_log(WINDOW **log_window){
+  //wmove(*print_errs, 1, 1);
+  //wprintw(*print_errs, message);
+  //wrefresh(*print_errs);
+  werase(*log_window);
+  wrefresh(*log_window);
+  wmove(*log_window, 1, 1);
+  int fd = open("log.txt", O_RDONLY);
+  if (fd == -1){
+    printf("can't open log.txt in print_log\n");
+  }
+  int ret_read = 1; //end the while loop when read returns that it's read 0 bytes
+  char buf; //to put on screen
+  while (ret_read){
+    ret_read = read(fd, &buf, ret_read); //read in 1 char at a time
+    waddch(*log_window, buf);
+    wrefresh(*log_window);
+  }
+  close(fd); //close when done
+  return 0;
+}
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	int startx, starty, width, height;
 
