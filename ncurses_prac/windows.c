@@ -44,9 +44,9 @@ int main(int argc, char *argv[]){
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
 	local_win = newwin(height, width, starty, startx);
-	box(local_win, 0 , 0);		/* 0, 0 gives default characters
-					 * for the vertical and horizontal
-					 * lines			*/
+	//box(local_win, 0 , 0);		/* 0, 0 gives default characters
+	//				 * for the vertical and horizontal
+	//				 * lines			*/
 	wrefresh(local_win);		/* Show that box 		*/
 
 	return local_win;
@@ -185,10 +185,19 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
     mvaddch(i, pos, ACS_VLINE);
     i++;
   }
+  //also draw horizontal line, ACS_HLINE --actually there should already be room at LINES - 5
+  pos = LINES - 5; //ycor
+  i = width; //so that it doesn't go into game window
+  mvaddch(pos, i, ACS_LTEE);
+  i++;
+  while(i<COLS){
+    mvaddch(pos, i, ACS_HLINE);
+    i++;
+  }
 	refresh();
   //making room for the veritcal line
 	*game_win = create_newwin(height, width-1, starty, startx);
-  height = LINES - 5;
+  height = LINES - 6;
   width = COLS - (COLS / 2 + 3);
   starty = 1;
   startx = COLS / 2 + 2;
@@ -199,7 +208,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   startx = COLS / 2 + 2;
   *type_win = create_newwin(height, width, starty, startx);
   //we don't need the box so let's erase
-  werase(*type_win);
+  //werase(*type_win);
   //DONT redraw the box
   wrefresh(*type_win);
   // // //don't need box for type
