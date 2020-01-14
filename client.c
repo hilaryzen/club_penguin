@@ -15,7 +15,6 @@
 #include "packets.h"
 #include "windowing.h"
 
-int touch_log = 1;
 int sd; // descriptor for socket to the server
 
 int main(int argc, char *argv[]){
@@ -41,12 +40,6 @@ int main(int argc, char *argv[]){
   *(strchr(cnx_info.username,'\n')) = '\0'; // eliminate newline
   cnx_info.room = 0;
 
-  //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
-  if (create_log()){
-    //if this fails, change touch_log to 0 so we don't update a log that isn't existing
-    touch_log = 0;
-    printf("uh oh, create_log malfunctioned -- touch_log = 0\n");
-  }
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
@@ -77,9 +70,6 @@ int main(int argc, char *argv[]){
     //   -right now this is just printing a new prompt
     //   -unless we use sdl or something, we could use this space to reprint the current state of the game/messages
 
-    fflush(stdin); // i do not understand what this does but it was in mr dw's code and stuff acts weird without it
-    printf("enter data: ");
-
     // 2. SELECT(): reset set configuration and then wait for one of the internal sd's to have data; either stdin or sd
     reset_fdset(&readset,sd);
     select(sd+1,&readset,NULL,NULL,NULL);
@@ -102,14 +92,9 @@ int main(int argc, char *argv[]){
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
-      if (touch_log){
-        r = update_log(packet.CHATMSG.message, header.username);
-        if (r != 0){
-          printf("update_log not working\n");
-        }
-      }
       //print and reprint below
-      print_log(&chat_win);
+      wprintw(chat_win,"[%s]: %s\n",header.username,packet.CHATMSG.message);
+      wrefresh(chat_win);
     }
   }
   wmove(chat_win, 1, 1);
@@ -151,35 +136,13 @@ void reset_fdset(fd_set *set,int sd){
   FD_SET(sd,set);
 }
 
-int update_log(char *addition, char *who_sent){
-  int fd = open("log.txt", O_WRONLY | O_APPEND);
-  exit_err(fd, "tried opening update_log");
-  int len_write = strlen(who_sent);
-  write(fd, who_sent, len_write);
-  write(fd,": ",2);
-  len_write = strlen(addition); //so this should also add the \n
-  write(fd, addition, len_write);
-  write(fd,"\n",1);
-  exit_err(close(fd), "couldn't close log.txt in update_log");
-  return 0;
-}
-
-int create_log(){
-  //only the user shld be able to interact w log
-  //also, i don't want to recreate the log if for somereason client runs main over again
-  int fd = open("log.txt", O_CREAT | O_EXCL, 0600);
-  if (fd == -1){
-    return 1; //so if this file already exists (2+ clients in same direcotry), don't make it again
-  }
-  return 0;
-}
-
 void sendchat(char *msg){
+  printf("?");
   struct packet_header header;
   struct chatmsg message;
   strncpy(message.message,msg,128);
-  header.packet_size = sizeof(struct chatmsg);
+  header.packet_size = strlen(msg);
   header.packet_type = P_CHATMSG;
   write(sd,&header,sizeof(struct packet_header));
-  write(sd,&message,sizeof(struct chatmsg));
+  write(sd,&message,header.packet_size);
 }
