@@ -5,6 +5,7 @@
 #include <fcntl.h>
 
 #include "windowing.h"
+#include "client.h"
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
@@ -72,7 +73,9 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs,int *ind,char *message
     //wrefresh(*print_errs);
     //and clear it
     message[i] = ch; //add new line to message
-    add_to_log(message, i+1); //we use i to see if write fails
+    // add_to_log(message, i+1); //we use i to see if write fails
+    sendchat(message);
+    
     print_log(print_errs);//print the log to the chat window
     message[i] = ' ';
     i = 0; //reset the message

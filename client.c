@@ -16,12 +16,12 @@
 #include "windowing.h"
 
 int touch_log = 1;
+int sd; // descriptor for socket to the server
 
 int main(int argc, char *argv[]){
 
   // DECLARATIONS
   int r; // temporary type variable to store return values that might indicate errors
-  int sd; // descriptor for socket to the server
   char *host; // server IPv4 address
   fd_set readset; // buffer in which set of file descriptors for select() will be put
   /* buffers in which to put messages to be written onto the socket */
@@ -91,16 +91,16 @@ int main(int argc, char *argv[]){
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
     if (FD_ISSET(sd,&readset)) {
-      printf("[client] received packet from server\n");
+      // printf("[client] received packet from server\n");
       r = read(sd,&header,sizeof(struct packet_header));
       // this is my current makeshift way of checking whether the received message is an end of file
       if(r != sizeof(struct packet_header)){
-	       printf("eof i think\n");
-	        exit(0);
+	// printf("eof i think\n");
+	exit(0);
       }
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
-      printf("message: [%s]\n",packet.CHATMSG.message);
+      // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
       if (touch_log){
         r = update_log(packet.CHATMSG.message, header.username);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
         }
       }
       //print and reprint below
-
+      print_log(&chat_win);
     }
   }
   wmove(chat_win, 1, 1);
@@ -154,12 +154,12 @@ void reset_fdset(fd_set *set,int sd){
 int update_log(char *addition, char *who_sent){
   int fd = open("log.txt", O_WRONLY | O_APPEND);
   exit_err(fd, "tried opening update_log");
-  strcat(who_sent, ": ");
   int len_write = strlen(who_sent);
   write(fd, who_sent, len_write);
-  strcat(addition, "\n");
+  write(fd,": ",2);
   len_write = strlen(addition); //so this should also add the \n
   write(fd, addition, len_write);
+  write(fd,"\n",1);
   exit_err(close(fd), "couldn't close log.txt in update_log");
   return 0;
 }
@@ -172,4 +172,14 @@ int create_log(){
     return 1; //so if this file already exists (2+ clients in same direcotry), don't make it again
   }
   return 0;
+}
+
+void sendchat(char *msg){
+  struct packet_header header;
+  struct chatmsg message;
+  strncpy(message.message,msg,128);
+  header.packet_size = sizeof(struct chatmsg);
+  header.packet_type = P_CHATMSG;
+  write(sd,&header,sizeof(struct packet_header));
+  write(sd,&message,sizeof(struct chatmsg));
 }

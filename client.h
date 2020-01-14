@@ -8,6 +8,8 @@ int main(int argc, char *argv[]);
 
 void reset_fdset(fd_set *set, int sd); // zeroes `set` and puts stdin and the specified socket descriptor in
 
+void sendchat(char *msg);
+
 int client_setup(char *server);
 
 /*
