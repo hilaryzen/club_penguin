@@ -95,28 +95,31 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
           break;
         */
         case KEY_UP:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key up");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y-1, x);
+          //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+          i = x * (y);
+          wrefresh(*type_win);
           break;
         case KEY_DOWN:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key down");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y+1, x);
+          i = x * (y+2);
+          wrefresh(*type_win);
           break;
         case KEY_LEFT:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key left");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
           break;
         case KEY_RIGHT:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key right");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i++;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x+1);
+          wrefresh(*type_win);
           break;
         case KEY_F(1):
           wmove(*print_errs, 1, 1);
