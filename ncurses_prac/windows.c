@@ -11,7 +11,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int read_from_type(WINDOW **type_win, WINDOW **print_errs);
+int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win);
 int add_to_log(char *message, int i); //if file doesn't already exist, will create
 int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh typing window after to move cursor
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     wrefresh(type_win);
 	}
   */
-  if (read_from_type(&type_win, &chat_win)){
+  if (read_from_type(&type_win, &chat_win, &game_win)){
     printf("uh oh, can't read from type window!\n");
   }
   if (cleanup(&game_win, &chat_win, &type_win)){
@@ -52,7 +52,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **print_errs){
+int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win){
   //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = ' ';
   keypad(*type_win, TRUE);
@@ -130,6 +130,23 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
           wrefresh(*print_errs); //refresh the window
           wmove(*type_win, 1, 1);
           return 0; //end the function
+          break;
+        case KEY_F(2):
+          wmove(*game_win, 1, 1);
+          wrefresh(*game_win);
+          //actually some function should be called, called "interact with game" -- hilary's thing, it can have
+          //a for loop identical to this and if F3 is called, go back to this
+          //hm but this on it's own will return to typing bar if you press a character
+          break;
+        case KEY_F(3):
+          wmove(*type_win, 0, 0);
+          wrefresh(*type_win);
+          break;
+        case KEY_F(4):
+          wmove(*print_errs, 1, 1);
+          wrefresh(*print_errs);
+          //some function should be called here where you can scroll thru the chat, and if F3 is called go back to this
+          //hm but this on it's own will return to typing bar if you press a character
           break;
         default:
           break;
