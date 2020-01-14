@@ -64,7 +64,36 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   while(1){
     ch = wgetch(*type_win); //get what the user puts down
     if (i < 126 && ch != '\n'){
+      if (!has_key(ch)){
+        message[i] = ch;
+        i++;
+        waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+        //waddch(*type_win, ' ');
+        wrefresh(*type_win); //refresh the window
+      }
+      //else if it's special
       switch (ch){ //switch so we can add diff stuff later
+        int y, x;
+        case KEY_BACKSPACE:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        case KEY_DC:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        /*
+        case KEY_CH:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        */
         case KEY_UP:
           wmove(*print_errs, 1, 1);
           wprintw(*print_errs, "key up");
@@ -97,11 +126,6 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
           return 0; //end the function
           break;
         default:
-          message[i] = ch;
-          i++;
-          waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-          //waddch(*type_win, ' ');
-          wrefresh(*type_win); //refresh the window
           break;
         }
     }else if (ch == '\n'){
