@@ -60,13 +60,16 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   scrollok(*print_errs, TRUE);
   wmove(*type_win, 0, 0); //set cursor
   char message[128];
+  //char *to_send;
   int i = 0;
+  int size = 0;
   while(1){
     ch = wgetch(*type_win); //get what the user puts down
     if (i < 126 && ch != '\n'){
       if (!has_key(ch)){
         message[i] = ch;
         i++;
+        size++;
         waddch(*type_win, ch); //add it back to the window, but only if it isn't special
         //waddch(*type_win, ' ');
         wrefresh(*type_win); //refresh the window
@@ -135,17 +138,12 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
       // initiate chat sending process
       //networking stuff
       werase(*type_win);
-      //DONT redraw the box
-      //just for checking, print message
-      //wmove(*print_errs, 1, 1);
-      //wprintw(*print_errs, message);
-      //wrefresh(*print_errs);
-      //and clear it
-      message[i] = ch; //add new line to message
-      add_to_log(message, i+1); //we use i to see if write fails
+      message[size] = ch; //add new line to message
+      add_to_log(message, size+1); //we use i to see if write fails
       print_log(print_errs);//print the log to the chat window
       message[i] = ' ';
       i = 0; //reset the message
+      size = 0;
       wrefresh(*type_win); //move cursor back
     }else if (i == 126){
       // keep going until they press enter those fools
@@ -204,10 +202,10 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	width = COLS / 2;
 	starty = 1;	/* Calculating for a center placement */
 	startx = 1;	/* of the window		*/
-	printw("Press F1 to exit");
+	printw("F1: Exit, F2: Move avatar, F3: Type chat, F4: Scroll chat");
   //move cursor to middle and for height of screen draw vertical line
   int pos = width; //xcor
-  int i = 0;
+  int i = 1;
   while (i < LINES){
     mvaddch(i, pos, ACS_VLINE);
     i++;
