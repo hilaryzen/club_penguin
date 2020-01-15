@@ -11,7 +11,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int read_from_type(WINDOW **type_win, WINDOW **print_errs);
+int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win);
 int add_to_log(char *message, int i); //if file doesn't already exist, will create
 int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh typing window after to move cursor
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     wrefresh(type_win);
 	}
   */
-  if (read_from_type(&type_win, &chat_win)){
+  if (read_from_type(&type_win, &chat_win, &game_win)){
     printf("uh oh, can't read from type window!\n");
   }
   if (cleanup(&game_win, &chat_win, &type_win)){
@@ -44,15 +44,15 @@ int main(int argc, char *argv[]){
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
 	local_win = newwin(height, width, starty, startx);
-	box(local_win, 0 , 0);		/* 0, 0 gives default characters
-					 * for the vertical and horizontal
-					 * lines			*/
+	//box(local_win, 0 , 0);		/* 0, 0 gives default characters
+	//				 * for the vertical and horizontal
+	//				 * lines			*/
 	wrefresh(local_win);		/* Show that box 		*/
 
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **print_errs){
+int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win){
   //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = ' ';
   keypad(*type_win, TRUE);
@@ -60,34 +60,69 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
   scrollok(*print_errs, TRUE);
   wmove(*type_win, 0, 0); //set cursor
   char message[128];
+  //char *to_send;
   int i = 0;
+  int size = 0;
   while(1){
     ch = wgetch(*type_win); //get what the user puts down
     if (i < 126 && ch != '\n'){
+      if (!has_key(ch)){
+        message[i] = ch;
+        i++;
+        size++;
+        waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+        //waddch(*type_win, ' ');
+        wrefresh(*type_win); //refresh the window
+      }
+      //else if it's special
       switch (ch){ //switch so we can add diff stuff later
+        int y, x;
+        case KEY_BACKSPACE:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        case KEY_DC:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        /*
+        case KEY_CH:
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
+          break;
+        */
         case KEY_UP:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key up");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y-1, x);
+          //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+          i = x * (y);
+          wrefresh(*type_win);
           break;
         case KEY_DOWN:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key down");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y+1, x);
+          i = x * (y+2);
+          wrefresh(*type_win);
           break;
         case KEY_LEFT:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key left");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i--;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x-1);
+          wrefresh(*type_win);
           break;
         case KEY_RIGHT:
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "key right");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 0, i+1);
+          i++;
+          getyx(*type_win, y, x);
+          wmove(*type_win, y, x+1);
+          wrefresh(*type_win);
           break;
         case KEY_F(1):
           wmove(*print_errs, 1, 1);
@@ -96,29 +131,36 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs){
           wmove(*type_win, 1, 1);
           return 0; //end the function
           break;
+        case KEY_F(2):
+          wmove(*game_win, 1, 1);
+          wrefresh(*game_win);
+          //actually some function should be called, called "interact with game" -- hilary's thing, it can have
+          //a for loop identical to this and if F3 is called, go back to this
+          //hm but this on it's own will return to typing bar if you press a character
+          break;
+        case KEY_F(3):
+          wmove(*type_win, 0, 0);
+          wrefresh(*type_win);
+          break;
+        case KEY_F(4):
+          wmove(*print_errs, 1, 1);
+          wrefresh(*print_errs);
+          //some function should be called here where you can scroll thru the chat, and if F3 is called go back to this
+          //hm but this on it's own will return to typing bar if you press a character
+          break;
         default:
-          message[i] = ch;
-          i++;
-          waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-          //waddch(*type_win, ' ');
-          wrefresh(*type_win); //refresh the window
           break;
         }
     }else if (ch == '\n'){
       // initiate chat sending process
       //networking stuff
       werase(*type_win);
-      //DONT redraw the box
-      //just for checking, print message
-      //wmove(*print_errs, 1, 1);
-      //wprintw(*print_errs, message);
-      //wrefresh(*print_errs);
-      //and clear it
-      message[i] = ch; //add new line to message
-      add_to_log(message, i+1); //we use i to see if write fails
+      message[size] = ch; //add new line to message
+      add_to_log(message, size+1); //we use i to see if write fails
       print_log(print_errs);//print the log to the chat window
       message[i] = ' ';
       i = 0; //reset the message
+      size = 0;
       wrefresh(*type_win); //move cursor back
     }else if (i == 126){
       // keep going until they press enter those fools
@@ -148,7 +190,7 @@ int print_log(WINDOW **log_window){
   //wrefresh(*print_errs);
   werase(*log_window);
   wrefresh(*log_window);
-  wmove(*log_window, 1, 1);
+  wmove(*log_window, 1, 0);
   int fd = open("log.txt", O_RDONLY);
   if (fd == -1){
     printf("can't open log.txt in print_log\n");
@@ -177,10 +219,27 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	width = COLS / 2;
 	starty = 1;	/* Calculating for a center placement */
 	startx = 1;	/* of the window		*/
-	printw("Press F1 to exit");
+	printw("F1: Exit, F2: Move avatar, F3: Type chat, F4: Scroll chat");
+  //move cursor to middle and for height of screen draw vertical line
+  int pos = width; //xcor
+  int i = 1;
+  while (i < LINES){
+    mvaddch(i, pos, ACS_VLINE);
+    i++;
+  }
+  //also draw horizontal line, ACS_HLINE --actually there should already be room at LINES - 5
+  pos = LINES - 5; //ycor
+  i = width; //so that it doesn't go into game window
+  mvaddch(pos, i, ACS_LTEE);
+  i++;
+  while(i<COLS){
+    mvaddch(pos, i, ACS_HLINE);
+    i++;
+  }
 	refresh();
-	*game_win = create_newwin(height, width, starty, startx);
-  height = LINES - 5;
+  //making room for the veritcal line
+	*game_win = create_newwin(height, width-1, starty, startx);
+  height = LINES - 6;
   width = COLS - (COLS / 2 + 3);
   starty = 1;
   startx = COLS / 2 + 2;
@@ -191,7 +250,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   startx = COLS / 2 + 2;
   *type_win = create_newwin(height, width, starty, startx);
   //we don't need the box so let's erase
-  werase(*type_win);
+  //werase(*type_win);
   //DONT redraw the box
   wrefresh(*type_win);
   // // //don't need box for type
