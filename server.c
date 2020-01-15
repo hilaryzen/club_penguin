@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <netdb.h>
 
@@ -113,6 +114,8 @@ void process_queue(int qd){
   // DECLARATIONS: space in which to read in packets from the queue
   struct packet_header header;
   union packet packet;
+  memset(&header,0,sizeof(struct packet_header));
+  memset(&packet,0,sizeof(union packet));
   int i; // index incrementer
   printf("[qhandler %d] start\n",getpid());
   // unless the queue is destroyed somehow, reads header and packet from the queue
@@ -127,9 +130,12 @@ void process_queue(int qd){
 	     then write the packet to its socket */
       if( SHM[i].id>=0 && should_receive(SHM+i,&header,&packet) ){
 	write( SHM[i].sd, &header, sizeof( struct packet_header ) );
-	write( SHM[i].sd, &packet, header.packet_size );
+	int r = write( SHM[i].sd, &packet, header.packet_size );
+	printf("%d bytes of a packet sent\n",r);
       }
     }
+    memset(&header,0,sizeof(struct packet_header));
+    memset(&packet,0,sizeof(union packet));
   }
   // i don't think this would ever be reached but just in case
   exit(0);

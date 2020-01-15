@@ -67,7 +67,8 @@ int main(int argc, char *argv[]){
   keypad(type_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
   wmove(type_win, 0, 0); //set cursor
-  char message[128] = "";
+  char message[128];
+  memset(message,0,sizeof(message));
   //char *to_send;
   int i = 0;
   int size = 0;
@@ -94,14 +95,15 @@ int main(int argc, char *argv[]){
       // this is my current makeshift way of checking whether the received message is an end of file
       if(r != sizeof(struct packet_header)){
 	       printf("eof i think\n");
-	        exit(0);
+	       break;
       }
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
-
+      packet.CHATMSG.message[header.packet_size] = '\0';
       char msgbuffer[256];
+      memset(msgbuffer,0,sizeof(msgbuffer));
       sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
       add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
       print_log(&chat_win,log_fd);
@@ -155,6 +157,8 @@ void reset_fdset(fd_set *set,int sd){
 void sendchat(char *msg, int size){
   struct packet_header header;
   struct chatmsg message;
+  memset(&header,0,sizeof(struct packet_header));
+  memset(&message,0,sizeof(struct chatmsg));
   //alma adding that you fill in header to have username too
   strncpy(header.username, cnx_info.username,16);
   strncpy(message.message,msg,size);

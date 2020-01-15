@@ -19,6 +19,12 @@ void insertchar(char *buf,int i,char c){
   buf[i] = c;
 }
 
+void deletechar(char *buf,int i){
+  while(buf[i]){
+    buf[i] = buf[++i];
+  }
+}
+
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
 	local_win = newwin(height, width, starty, startx);
@@ -51,7 +57,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     switch (ch){ //switch so we can add diff stuff later
       int y, x;
     case KEY_BACKSPACE:
-      i--;
+      deletechar(message,i);
       getyx(*type_win, y, x);
       wmove(*type_win, y, x-1);
       wrefresh(*type_win);
@@ -129,11 +135,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     //networking stuff
     werase(*type_win);
     insertchar(message,size,'\n');
-    sendchat(message, size);
+    sendchat(message, size+1);
     // add_to_log(message, size+1); //we use i to see if write fails
     // print_log(chat_win);//print the log to the chat window
-    // this is kinda overkill but im going crazy
-    for(i=0;i<128;i++) message[i] = 0;
+    memset(message,0,128);
     i = 0; //reset the message
     size = 0;
     wrefresh(*type_win); //move cursor back
