@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
   WINDOW *chat_win;
   WINDOW *type_win;
   int log_fd; // file descriptor for log.txt
-  
+
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 
   // CONFIGURE WINDOWS
   exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
-  
+
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
@@ -152,12 +152,12 @@ void reset_fdset(fd_set *set,int sd){
   FD_SET(sd,set);
 }
 
-void sendchat(char *msg){
+void sendchat(char *msg, int size){
   struct packet_header header;
   struct chatmsg message;
   //alma adding that you fill in header to have username too
   strncpy(header.username, cnx_info.username,16);
-  strncpy(message.message,msg,128);
+  strncpy(message.message,msg,size);
   //
   header.packet_type = P_CHATMSG;
   header.packet_size = strlen(message.message);

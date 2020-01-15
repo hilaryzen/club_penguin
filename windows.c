@@ -129,7 +129,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
     //networking stuff
     werase(*type_win);
     insertchar(message,size,'\n');
-    sendchat(message);
+    sendchat(message, size);
     // add_to_log(message, size+1); //we use i to see if write fails
     // print_log(print_errs);//print the log to the chat window
     // this is kinda overkill but im going crazy
