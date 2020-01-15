@@ -7,32 +7,6 @@
 #include "windows.h"
 //PATH = "log.txt"
 
-int main(int argc, char *argv[]){
-  WINDOW *game_win;
-  WINDOW *chat_win;
-  WINDOW *type_win;
-  int ch;
-  if (setup(&game_win, &chat_win, &type_win)){
-    printf("uh oh, setup failed\n");
-  }
-  /*
-	while((ch = getch()) != KEY_F(1))
-	{
-    wmove(type_win, 1, 1);
-    wrefresh(type_win);
-	}
-  */
-  if (read_from_type(&type_win, &chat_win, &game_win)){
-    printf("uh oh, can't read from type window!\n");
-  }
-  if (cleanup(&game_win, &chat_win, &type_win)){
-    printf("uh oh, cleanup failed\n");
-  }
-  //sleep(2); just did this to test that cleanup works
-	endwin();			/* End curses mode		  */
-	return 0;
-}
-
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
 	local_win = newwin(height, width, starty, startx);
@@ -44,123 +18,114 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win){
+int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,char *message, int *ind,int *sz){
+  int i = *ind;
+  int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
-  int ch = ' ';
-  keypad(*type_win, TRUE);
-  scrollok(*type_win, TRUE); //so if we've printed out of the window, will just scroll down
-  scrollok(*print_errs, TRUE);
-  wmove(*type_win, 0, 0); //set cursor
-  char message[128];
-  //char *to_send;
-  int i = 0;
-  int size = 0;
-  while(1){
-    ch = wgetch(*type_win); //get what the user puts down
-    if (i < 126 && ch != '\n'){
-      if (!has_key(ch)){
-        message[i] = ch;
-        i++;
-        size++;
-        waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-        //waddch(*type_win, ' ');
-        wrefresh(*type_win); //refresh the window
-      }
-      //else if it's special
-      switch (ch){ //switch so we can add diff stuff later
-        int y, x;
-        case KEY_BACKSPACE:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y, x-1);
-          wrefresh(*type_win);
-          break;
-        case KEY_DC:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y, x-1);
-          wrefresh(*type_win);
-          break;
-        /*
-        case KEY_CH:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y, x-1);
-          wrefresh(*type_win);
-          break;
-        */
-        case KEY_UP:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y-1, x);
-          //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
-          i = x * (y);
-          wrefresh(*type_win);
-          break;
-        case KEY_DOWN:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y+1, x);
-          i = x * (y+2);
-          wrefresh(*type_win);
-          break;
-        case KEY_LEFT:
-          i--;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y, x-1);
-          wrefresh(*type_win);
-          break;
-        case KEY_RIGHT:
-          i++;
-          getyx(*type_win, y, x);
-          wmove(*type_win, y, x+1);
-          wrefresh(*type_win);
-          break;
-        case KEY_F(1):
-          wmove(*print_errs, 1, 1);
-          wprintw(*print_errs, "f1 key\n");
-          wrefresh(*print_errs); //refresh the window
-          wmove(*type_win, 1, 1);
-          return 0; //end the function
-          break;
-        case KEY_F(2):
-          wmove(*game_win, 1, 1);
-          wrefresh(*game_win);
-          //actually some function should be called, called "interact with game" -- hilary's thing, it can have
-          //a for loop identical to this and if F3 is called, go back to this
-          //hm but this on it's own will return to typing bar if you press a character
-          break;
-        case KEY_F(3):
-          wmove(*type_win, 0, 0);
-          wrefresh(*type_win);
-          break;
-        case KEY_F(4):
-          wmove(*print_errs, 1, 1);
-          wrefresh(*print_errs);
-          //some function should be called here where you can scroll thru the chat, and if F3 is called go back to this
-          //hm but this on it's own will return to typing bar if you press a character
-          break;
-        default:
-          break;
-        }
-    }else if (ch == '\n'){
-      // initiate chat sending process
-      //networking stuff
-      werase(*type_win);
-      message[size] = ch; //add new line to message
-      add_to_log(message, size+1); //we use i to see if write fails
-      print_log(print_errs);//print the log to the chat window
-      message[i] = ' ';
-      i = 0; //reset the message
-      size = 0;
-      wrefresh(*type_win); //move cursor back
-    }else if (i == 126){
-      // keep going until they press enter those fools
+  int ch = wgetch(*type_win); //get what the user puts down
+  if (i < 126 && ch != '\n'){
+    if (!has_key(ch)){
+      message[i] = ch;
+      i++;
+      size++;
+      waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+      //waddch(*type_win, ' ');
+      wrefresh(*type_win); //refresh the window
     }
-  } //if you press f1, this returns and main goes onto cleanup and end
-  wmove(*print_errs, 1, 1);
-  wprintw(*print_errs, "returning 0, broke out of loop somehow\n");
-  return 0;
+    //else if it's special
+    switch (ch){ //switch so we can add diff stuff later
+      int y, x;
+    case KEY_BACKSPACE:
+      i--;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y, x-1);
+      wrefresh(*type_win);
+      break;
+    case KEY_DC:
+      i--;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y, x-1);
+      wrefresh(*type_win);
+      break;
+      /*
+        case KEY_CH:
+	i--;
+	getyx(*type_win, y, x);
+	wmove(*type_win, y, x-1);
+	wrefresh(*type_win);
+	break;
+      */
+    case KEY_UP:
+      i--;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y-1, x);
+      //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+      i = x * (y);
+      wrefresh(*type_win);
+      break;
+    case KEY_DOWN:
+      i--;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y+1, x);
+      i = x * (y+2);
+      wrefresh(*type_win);
+      break;
+    case KEY_LEFT:
+      i--;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y, x-1);
+      wrefresh(*type_win);
+      break;
+    case KEY_RIGHT:
+      i++;
+      getyx(*type_win, y, x);
+      wmove(*type_win, y, x+1);
+      wrefresh(*type_win);
+      break;
+    case KEY_F(1):
+      wmove(*print_errs, 1, 1);
+      wprintw(*print_errs, "f1 key\n");
+      wrefresh(*print_errs); //refresh the window
+      wmove(*type_win, 1, 1);
+      return 0; //end the function
+      break;
+    case KEY_F(2):
+      wmove(*game_win, 1, 1);
+      wrefresh(*game_win);
+      //actually some function should be called, called "interact with game" -- hilary's thing, it can have
+      //a for loop identical to this and if F3 is called, go back to this
+      //hm but this on it's own will return to typing bar if you press a character
+      break;
+    case KEY_F(3):
+      wmove(*type_win, 0, 0);
+      wrefresh(*type_win);
+      break;
+    case KEY_F(4):
+      wmove(*print_errs, 1, 1);
+      wrefresh(*print_errs);
+      //some function should be called here where you can scroll thru the chat, and if F3 is called go back to this
+      //hm but this on it's own will return to typing bar if you press a character
+      break;
+    default:
+      break;
+    }
+  }else if (ch == '\n'){
+    // initiate chat sending process
+    //networking stuff
+    werase(*type_win);
+    message[size] = ch; //add new line to message
+    add_to_log(message, size+1); //we use i to see if write fails
+    print_log(print_errs);//print the log to the chat window
+    message[i] = ' ';
+    i = 0; //reset the message
+    size = 0;
+    wrefresh(*type_win); //move cursor back
+  }else if (i == 126){
+    // keep going until they press enter those fools
+  }
+  *ind = i;
+  *sz = size;
+  return i;
 }
 
 int add_to_log(char *message, int i){

@@ -8,25 +8,30 @@
 #include <string.h>
 #include <string.h>
 #include <fcntl.h>
-
+#include <ncurses.h>
 
 #include "err.h"
 #include "client.h"
 #include "packets.h"
+#include "windows.h"
 
 int touch_log = 1;
+int sd; // descriptor for socket to the server
+struct cnx_header cnx_info; // struct which contains information about our connection
 
 int main(int argc, char *argv[]){
 
   // DECLARATIONS
   int r; // temporary type variable to store return values that might indicate errors
-  int sd; // descriptor for socket to the server
   char *host; // server IPv4 address
   fd_set readset; // buffer in which set of file descriptors for select() will be put
   /* buffers in which to put messages to be written onto the socket */
   struct packet_header header;
   union packet packet;
-  struct cnx_header cnx_info; // struct which contains information about our connection
+  /* ncurses windows for typing buffer, game display, and chat window */
+  WINDOW *game_win;
+  WINDOW *chat_win;
+  WINDOW *type_win;
 
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
@@ -52,14 +57,23 @@ int main(int argc, char *argv[]){
   write(sd,&cnx_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
 
+  // CONFIGURE WINDOWS
+  exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
+  
+  // (from read_from_type(): configure text input spacing
+  keypad(type_win, TRUE);
+  scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  wmove(type_win, 0, 0); //set cursor
+  char message[128];
+  //char *to_send;
+  int i = 0;
+  int size = 0;
+
   // forever loop: as data comes in, interpret keyboard input or server messages
   while (1) {
     // 1. PRINT CURRENT STATE
     //   -right now this is just printing a new prompt
     //   -unless we use sdl or something, we could use this space to reprint the current state of the game/messages
-
-    fflush(stdin); // i do not understand what this does but it was in mr dw's code and stuff acts weird without it
-    printf("enter data: ");
 
     // 2. SELECT(): reset set configuration and then wait for one of the internal sd's to have data; either stdin or sd
     reset_fdset(&readset,sd);
@@ -67,21 +81,7 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      // get the message, remove the newline
-      fgets(packet.CHATMSG.message,128,stdin);
-      *strchr(packet.CHATMSG.message,'\n') = '\0';
-      //remember to re-add that \n when you add this line to your log.txt ^^
-
-      // configure header to contain proper information about the packet
-
-      //alma adding that you fill in header to have username too
-      strcpy(header.username, cnx_info.username);
-      //
-      header.packet_type = P_CHATMSG;
-      header.packet_size = sizeof(struct chatmsg);
-      // write the header and packet to the server socket
-      write(sd,&header,sizeof(struct packet_header));
-      write(sd,&packet,sizeof(struct chatmsg));
+      read_from_type(&type_win,&chat_win,&chat_win,message,&i,&size);
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
@@ -107,6 +107,13 @@ int main(int argc, char *argv[]){
 
     }
   }
+
+  if (cleanup(&game_win, &chat_win, &type_win)){
+    printf("uh oh, cleanup failed\n");
+  }
+  //sleep(2); just did this to test that cleanup works
+  endwin();			/* End curses mode		  */
+
   return 0;
 }
 
@@ -165,4 +172,17 @@ int create_log(){
     return 1; //so if this file already exists (2+ clients in same direcotry), don't make it again
   }
   return 0;
+}
+
+void write_sd(char *msg){
+  struct packet_header header;
+  union packet packet;
+  //alma adding that you fill in header to have username too
+  strcpy(header.username, cnx_info.username);
+  //
+  header.packet_type = P_CHATMSG;
+  header.packet_size = sizeof(struct chatmsg);
+  // write the header and packet to the server socket
+  write(sd,&header,sizeof(struct packet_header));
+  write(sd,&packet,sizeof(struct chatmsg));
 }
