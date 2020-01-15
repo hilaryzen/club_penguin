@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
   keypad(type_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
   wmove(type_win, 0, 0); //set cursor
-  char message[128];
+  char message[128] = "";
   //char *to_send;
   int i = 0;
   int size = 0;

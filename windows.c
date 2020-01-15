@@ -3,11 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "windows.h"
 #include "client.h"
 #include "err.h"
 //PATH = "log.txt"
+
+void insertchar(char *buf,int i,char c){
+  int j = strlen(buf);
+  buf[j+1] = '\0';
+  while(j > i){
+    buf[j] = buf[--j];
+  }
+  buf[i] = c;
+}
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
   WINDOW *local_win;
@@ -27,10 +37,13 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
   int ch = wgetch(*type_win); //get what the user puts down
   if (i < 126 && ch != '\n'){
     if (!has_key(ch)){
-      message[i] = ch;
+      insertchar(message,i,ch);
       i++;
       size++;
-      waddch(*type_win, ch); //add it back to the window, but only if it isn't special
+      werase(*type_win);
+      mvwprintw(*type_win,0,0,message);
+      wmove(*type_win,0,i);
+      // waddch(*type_win, ch); //add it back to the window, but only if it isn't special
       //waddch(*type_win, ' ');
       wrefresh(*type_win); //refresh the window
     }
@@ -115,22 +128,21 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
     // initiate chat sending process
     //networking stuff
     werase(*type_win);
-    message[size] = ch; //add new line to message
-    message[size+1] = '\0'; // im not sure whether its already null terminated but just to be on the safe side
+    insertchar(message,size,'\n');
     sendchat(message);
     // add_to_log(message, size+1); //we use i to see if write fails
     // print_log(print_errs);//print the log to the chat window
-    message[i] = ' ';
+    // this is kinda overkill but im going crazy
+    for(i=0;i<128;i++) message[i] = 0;
     i = 0; //reset the message
     size = 0;
-    *message = '\0';
     wrefresh(*type_win); //move cursor back
   }else if (i == 126){
     // keep going until they press enter those fools
   }
   *ind = i;
   *sz = size;
-  return i;
+  return 0;
 }
 
 int add_to_log(char *message, int i,int fd){
