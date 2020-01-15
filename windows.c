@@ -30,7 +30,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,char *message, int *ind,int *sz){
+int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz){
   int i = *ind;
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
@@ -98,9 +98,9 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
       wrefresh(*type_win);
       break;
     case KEY_F(1):
-      wmove(*print_errs, 1, 1);
-      wprintw(*print_errs, "f1 key\n");
-      wrefresh(*print_errs); //refresh the window
+      wmove(*chat_win, 1, 1);
+      wprintw(*chat_win, "f1 key\n");
+      wrefresh(*chat_win); //refresh the window
       wmove(*type_win, 1, 1);
       return -1;
       break;
@@ -116,8 +116,8 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
       wrefresh(*type_win);
       break;
     case KEY_F(4):
-      wmove(*print_errs, 1, 1);
-      wrefresh(*print_errs);
+      wmove(*chat_win, 1, 1);
+      wrefresh(*chat_win);
       //some function should be called here where you can scroll thru the chat, and if F3 is called go back to this
       //hm but this on it's own will return to typing bar if you press a character
       break;
@@ -131,7 +131,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
     insertchar(message,size,'\n');
     sendchat(message, size);
     // add_to_log(message, size+1); //we use i to see if write fails
-    // print_log(print_errs);//print the log to the chat window
+    // print_log(chat_win);//print the log to the chat window
     // this is kinda overkill but im going crazy
     for(i=0;i<128;i++) message[i] = 0;
     i = 0; //reset the message
@@ -156,9 +156,9 @@ int add_to_log(char *message, int i,int fd){
 }
 
 int print_log(WINDOW **log_window,int fd){
-  //wmove(*print_errs, 1, 1);
-  //wprintw(*print_errs, message);
-  //wrefresh(*print_errs);
+  //wmove(*chat_win, 1, 1);
+  //wprintw(*chat_win, message);
+  //wrefresh(*chat_win);
   werase(*log_window);
   wrefresh(*log_window);
   wmove(*log_window, 1, 0);
@@ -174,7 +174,7 @@ int print_log(WINDOW **log_window,int fd){
 }
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	int startx, starty, width, height;
-
+  printf("in setup\n");
 	initscr();			/* Start curses mode 		*/
 	cbreak();			/* Line buffering disabled, Pass on
 					 * everty thing to me 		*/
