@@ -259,7 +259,7 @@ void background(WINDOW **game_win, WINDOW **type_win) {
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
   mvwprintw(*game_win, y, x, " ");
   background(game_win, type_win);
-  mvwprintw(*game_win, y + y_move, x + x_move, "A");
+  mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
   wmove(*type_win, 0, 0); //Moves cursor back to type window
   wrefresh(*game_win);
   wrefresh(*type_win);
