@@ -14,6 +14,7 @@ int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
 int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, int char_y, int char_x);
 int add_to_log(char *message, int i); //if file doesn't already exist, will create
 int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh typing window after to move cursor
+void background(WINDOW **game_win, WINDOW **type_win);
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move);
 
 int main(int argc, char *argv[]){
@@ -244,8 +245,20 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   return 0; //just to show that it works
 }
 
+void background(WINDOW **game_win, WINDOW **type_win) {
+  wmove(*game_win, LINES - 7, 0);
+  int i = 0;
+  while(i < COLS / 2){
+    mvwprintw(*game_win, LINES - 7, i, "_");
+    i++;
+  }
+  //mvwprintw(*game_win, 2, 5, "A");
+  wrefresh(*game_win);
+}
+
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
-  mvwprintw(*game_win, y, x, " "); //Prints A in the middle of the game window
+  mvwprintw(*game_win, y, x, " ");
+  background(game_win, type_win);
   mvwprintw(*game_win, y + y_move, x + x_move, "A");
   wmove(*type_win, 0, 0); //Moves cursor back to type window
   wrefresh(*game_win);
