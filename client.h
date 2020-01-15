@@ -27,5 +27,5 @@ IF LOG ALREADY EXISTS SHOULD SET A FLAG 'TOUCHING LOG' TO FALSE! AKA 0 -- THAT W
 */
 int create_log();
 
-void sendchat(char *msg);
+void sendchat(char *msg, int size);
 #endif
