@@ -6,6 +6,7 @@
 
 #include "windows.h"
 #include "client.h"
+#include "err.h"
 //PATH = "log.txt"
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
@@ -131,38 +132,31 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
   return i;
 }
 
-int add_to_log(char *message, int i){
-  int fd = open("log.txt", O_WRONLY | O_CREAT | O_EXCL | O_APPEND, 0666);
-  if (fd == -1){
-    fd = open("log.txt", O_WRONLY | O_APPEND); //if it already exists, open w/o create
-  }
+int add_to_log(char *message, int i,int fd){
   int check = write(fd, message, i);
   if (check != i){
-    printf("not sure where on screen this is, but add_to_log not working\n");
+    perror("addtolog");
+    printf("fd of log: %d\n",fd);
     return 1;
   }
-  close(fd);
   return 0;
 }
-int print_log(WINDOW **log_window){
+
+int print_log(WINDOW **log_window,int fd){
   //wmove(*print_errs, 1, 1);
   //wprintw(*print_errs, message);
   //wrefresh(*print_errs);
   werase(*log_window);
   wrefresh(*log_window);
   wmove(*log_window, 1, 0);
-  int fd = open("log.txt", O_RDONLY);
-  if (fd == -1){
-    printf("can't open log.txt in print_log\n");
-  }
   int ret_read = 1; //end the while loop when read returns that it's read 0 bytes
   char buf; //to put on screen
+  lseek(fd,0,SEEK_SET);
   while (ret_read){
     ret_read = read(fd, &buf, ret_read); //read in 1 char at a time
     waddch(*log_window, buf);
     wrefresh(*log_window);
   }
-  close(fd); //close when done
   return 0;
 }
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){

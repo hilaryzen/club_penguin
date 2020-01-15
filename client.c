@@ -32,7 +32,8 @@ int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
   WINDOW *type_win;
-
+  int log_fd; // file descriptor for log.txt
+  
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -46,11 +47,13 @@ int main(int argc, char *argv[]){
   cnx_info.room = 0;
 
   //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
-  if (create_log()){
-    //if this fails, change touch_log to 0 so we don't update a log that isn't existing
-    touch_log = 0;
-    printf("uh oh, create_log malfunctioned -- touch_log = 0\n");
-  }
+  char log_filename[16];
+  sprintf(log_filename,"%d_log.txt",getpid());
+  log_fd = open(log_filename,O_CREAT|O_EXCL|O_TRUNC|O_RDWR,0600);
+  exit_err(log_fd,"open log file");
+  printf("value of log_fd: %d\n",log_fd);
+  r = write(log_fd,"CHAT START:\n",12);
+  exit_err(r,"write to log");
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
@@ -98,8 +101,11 @@ int main(int argc, char *argv[]){
       // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
 
-      add_to_log(packet.CHATMSG.message,header.packet_size);
-      print_log(&chat_win);
+      char msgbuffer[256];
+      sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
+      add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
+      print_log(&chat_win,log_fd);
+      wrefresh(type_win);
     }
   }
 
@@ -144,29 +150,6 @@ void reset_fdset(fd_set *set,int sd){
   FD_ZERO(set);
   FD_SET(STDIN_FILENO,set);
   FD_SET(sd,set);
-}
-
-int update_log(char *addition, char *who_sent){
-  int fd = open("log.txt", O_WRONLY | O_APPEND);
-  exit_err(fd, "tried opening update_log");
-  strcat(who_sent, ": ");
-  int len_write = strlen(who_sent);
-  write(fd, who_sent, len_write);
-  strcat(addition, "\n");
-  len_write = strlen(addition); //so this should also add the \n
-  write(fd, addition, len_write);
-  exit_err(close(fd), "couldn't close log.txt in update_log");
-  return 0;
-}
-
-int create_log(){
-  //only the user shld be able to interact w log
-  //also, i don't want to recreate the log if for somereason client runs main over again
-  int fd = open("log.txt", O_CREAT | O_EXCL, 0600);
-  if (fd == -1){
-    return 1; //so if this file already exists (2+ clients in same direcotry), don't make it again
-  }
-  return 0;
 }
 
 void sendchat(char *msg){
