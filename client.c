@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
     if (FD_ISSET(sd,&readset)) {
-      printf("[client] received packet from server\n");
+      // printf("[client] received packet from server\n");
       r = read(sd,&header,sizeof(struct packet_header));
       // this is my current makeshift way of checking whether the received message is an end of file
       if(r != sizeof(struct packet_header)){
@@ -95,16 +95,11 @@ int main(int argc, char *argv[]){
       }
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
-      printf("message: [%s]\n",packet.CHATMSG.message);
+      // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
-      if (touch_log){
-        r = update_log(packet.CHATMSG.message, header.username);
-        if (r != 0){
-          printf("update_log not working\n");
-        }
-      }
-      //print and reprint below
 
+      add_to_log(packet.CHATMSG.message,header.packet_size);
+      print_log(&chat_win);
     }
   }
 
@@ -174,15 +169,16 @@ int create_log(){
   return 0;
 }
 
-void write_sd(char *msg){
+void sendchat(char *msg){
   struct packet_header header;
-  union packet packet;
+  struct chatmsg message;
   //alma adding that you fill in header to have username too
-  strcpy(header.username, cnx_info.username);
+  strncpy(header.username, cnx_info.username,16);
+  strncpy(message.message,msg,128);
   //
   header.packet_type = P_CHATMSG;
-  header.packet_size = sizeof(struct chatmsg);
+  header.packet_size = strlen(message.message);
   // write the header and packet to the server socket
   write(sd,&header,sizeof(struct packet_header));
-  write(sd,&packet,sizeof(struct chatmsg));
+  write(sd,&message,header.packet_size);
 }

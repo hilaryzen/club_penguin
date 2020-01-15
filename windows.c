@@ -5,6 +5,7 @@
 #include <fcntl.h>
 
 #include "windows.h"
+#include "client.h"
 //PATH = "log.txt"
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
@@ -114,8 +115,10 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
     //networking stuff
     werase(*type_win);
     message[size] = ch; //add new line to message
-    add_to_log(message, size+1); //we use i to see if write fails
-    print_log(print_errs);//print the log to the chat window
+    message[size+1] = '\0'; // im not sure whether its already null terminated but just to be on the safe side
+    sendchat(message);
+    // add_to_log(message, size+1); //we use i to see if write fails
+    // print_log(print_errs);//print the log to the chat window
     message[i] = ' ';
     i = 0; //reset the message
     size = 0;
