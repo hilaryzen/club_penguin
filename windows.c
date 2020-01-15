@@ -146,6 +146,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
 }
 
 int add_to_log(char *message, int i,int fd){
+  //move to the end lseek(fd, )
   int check = write(fd, message, i);
   if (check != i){
     perror("addtolog");
