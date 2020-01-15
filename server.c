@@ -119,6 +119,8 @@ void process_queue(int qd){
   while( read(qd,&header,sizeof( struct packet_header )) ){
     printf("[qhandler %d] handling packet\n",getpid());
     read(qd,&packet,header.packet_size);
+    printf("packet.packet_size = %d\n",header.packet_size);
+    printf("packet message = [%s]\n",packet.CHATMSG.message);
     for( i=0; i<MAX_CNX; i++ ){
       /* foreach connection space:
 	     if there is a connection in this space and it should receive this packet,
