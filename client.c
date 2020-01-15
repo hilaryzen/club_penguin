@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      read_from_type(&type_win,&chat_win,&chat_win,message,&i,&size);
+      if( read_from_type(&type_win,&chat_win,&chat_win,message,&i,&size) ) break;
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE

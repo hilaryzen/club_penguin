@@ -89,7 +89,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
       wprintw(*print_errs, "f1 key\n");
       wrefresh(*print_errs); //refresh the window
       wmove(*type_win, 1, 1);
-      return 0; //end the function
+      return -1;
       break;
     case KEY_F(2):
       wmove(*game_win, 1, 1);
@@ -123,6 +123,7 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
     message[i] = ' ';
     i = 0; //reset the message
     size = 0;
+    *message = '\0';
     wrefresh(*type_win); //move cursor back
   }else if (i == 126){
     // keep going until they press enter those fools

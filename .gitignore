@@ -2,6 +2,9 @@
 server
 client
 
+# log files
+*_log.txt
+
 # Created by https://www.gitignore.io/api/emacs,c
 # Edit at https://www.gitignore.io/?templates=emacs,c
 
