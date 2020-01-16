@@ -58,3 +58,9 @@ hilaryZ -- 2020-01-08 01:31
 hilaryZ -- 2020-01-09 00:58
     -added test files using ncurses to sdl_practice folder on the sdl branch
     -created layout of three windows that will contain the user's game, chat, and message being typed
+    -finished comprehending Kiran's work (yea... that took long) 
+    -and started creating chat log
+    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the 
+     chat as a text file, but my 2 clients can't access it at the same time bc they share the same directory (i think if
+     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer. 
+     I should implement some sort of check that decides

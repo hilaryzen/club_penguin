@@ -35,7 +35,7 @@ void process_queue();
 
 /* ACTUAL NETWORKING STUFF */
 
-/* 
+/*
    creates, binds a server side socket and sets it to listening state
    returns the socket descriptor
 */

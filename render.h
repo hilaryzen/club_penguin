@@ -8,5 +8,5 @@
 
 void resize_term();
 void draw_penguin(int r,int c);
-
+void print_term();
 #endif

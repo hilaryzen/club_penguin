@@ -6,23 +6,34 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <string.h>
+#include <string.h>
+#include <fcntl.h>
+#include <ncurses.h>
 
 #include "err.h"
 #include "client.h"
 #include "packets.h"
+#include "windows.h"
+
+int touch_log = 1;
+int sd; // descriptor for socket to the server
+struct cnx_header cnx_info; // struct which contains information about our connection
 
 int main(int argc, char *argv[]){
 
   // DECLARATIONS
   int r; // temporary type variable to store return values that might indicate errors
-  int sd; // descriptor for socket to the server
   char *host; // server IPv4 address
   fd_set readset; // buffer in which set of file descriptors for select() will be put
   /* buffers in which to put messages to be written onto the socket */
   struct packet_header header;
   union packet packet;
-  struct cnx_header cnx_info; // struct which contains information about our connection
-    
+  /* ncurses windows for typing buffer, game display, and chat window */
+  WINDOW *game_win;
+  WINDOW *chat_win;
+  WINDOW *type_win;
+  int log_fd; // file descriptor for log.txt
+
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
   else if(*argv[1] == 'k') host = KHOSEKH; // if the second arg starts with 'k', it'll connect to kiran's droplet (just a convenience thing for me -k)
@@ -34,53 +45,78 @@ int main(int argc, char *argv[]){
   fgets(cnx_info.username,16,stdin);
   *(strchr(cnx_info.username,'\n')) = '\0'; // eliminate newline
   cnx_info.room = 0;
-  
+
+  //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
+  char log_filename[16];
+  sprintf(log_filename,"%d_log.txt",getpid());
+  log_fd = open(log_filename,O_CREAT|O_EXCL|O_TRUNC|O_RDWR,0600);
+  exit_err(log_fd,"open log file");
+  printf("value of log_fd: %d\n",log_fd);
+  r = write(log_fd,"CHAT START:\n",12);
+  exit_err(r,"write to log");
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
   write(sd,&cnx_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
 
+  // CONFIGURE WINDOWS
+  exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
+
+  // (from read_from_type(): configure text input spacing
+  keypad(type_win, TRUE);
+  scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  wmove(type_win, 0, 0); //set cursor
+  char message[128];
+  memset(message,0,sizeof(message));
+  //char *to_send;
+  int i = 0;
+  int size = 0;
+
   // forever loop: as data comes in, interpret keyboard input or server messages
   while (1) {
     // 1. PRINT CURRENT STATE
     //   -right now this is just printing a new prompt
     //   -unless we use sdl or something, we could use this space to reprint the current state of the game/messages
-    
-    fflush(stdin); // i do not understand what this does but it was in mr dw's code and stuff acts weird without it
-    printf("enter data: ");
-    
+
     // 2. SELECT(): reset set configuration and then wait for one of the internal sd's to have data; either stdin or sd
     reset_fdset(&readset,sd);
     select(sd+1,&readset,NULL,NULL,NULL);
-    
+
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      // get the message, remove the newline
-      fgets(packet.CHATMSG.message,80,stdin);
-      *strchr(packet.CHATMSG.message,'\n') = '\0';
-      // configure header to contain proper information about the packet
-      header.packet_type = P_CHATMSG;
-      header.packet_size = sizeof(struct chatmsg);
-      // write the header and packet to the server socket
-      write(sd,&header,sizeof(struct packet_header));
-      write(sd,&packet,sizeof(struct chatmsg));
+      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
     if (FD_ISSET(sd,&readset)) {
-      printf("[client] received packet from server\n");
+      // printf("[client] received packet from server\n");
       r = read(sd,&header,sizeof(struct packet_header));
       // this is my current makeshift way of checking whether the received message is an end of file
       if(r != sizeof(struct packet_header)){
-	printf("eof i think\n");
-	exit(0);
+	       printf("eof i think\n");
+	       break;
       }
       read(sd,&packet,header.packet_size);
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
-      printf("message: [%s]\n",packet.CHATMSG.message);
+      // printf("message: [%s]\n",packet.CHATMSG.message);
+      //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
+      packet.CHATMSG.message[header.packet_size] = '\0';
+      char msgbuffer[256];
+      memset(msgbuffer,0,sizeof(msgbuffer));
+      sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
+      add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
+      print_log(&chat_win,log_fd);
+      wrefresh(type_win);
     }
   }
+
+  if (cleanup(&game_win, &chat_win, &type_win)){
+    printf("uh oh, cleanup failed\n");
+  }
+  //sleep(2); just did this to test that cleanup works
+  endwin();			/* End curses mode		  */
+
   return 0;
 }
 
@@ -107,7 +143,7 @@ int client_setup(char *server){
   // free the resources we used
   free(hints);
   freeaddrinfo(results);
-  
+
   return sd;
 }
 
@@ -115,5 +151,21 @@ void reset_fdset(fd_set *set,int sd){
   /* uses the macro's specified in [man select] to set up a new fd set containing both stdin and the specified additional descriptor in `sd` */
   FD_ZERO(set);
   FD_SET(STDIN_FILENO,set);
-  FD_SET(sd,set);  
+  FD_SET(sd,set);
+}
+
+void sendchat(char *msg, int size){
+  struct packet_header header;
+  struct chatmsg message;
+  memset(&header,0,sizeof(struct packet_header));
+  memset(&message,0,sizeof(struct chatmsg));
+  //alma adding that you fill in header to have username too
+  strncpy(header.username, cnx_info.username,16);
+  strncpy(message.message,msg,size);
+  //
+  header.packet_type = P_CHATMSG;
+  header.packet_size = strlen(message.message);
+  // write the header and packet to the server socket
+  write(sd,&header,sizeof(struct packet_header));
+  write(sd,&message,header.packet_size);
 }

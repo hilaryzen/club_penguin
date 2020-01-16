@@ -11,3 +11,10 @@ void resize_term(){
 void draw_penguin(int r,int c){
   printf("\e[%d;%df%s",r,c,PENGUIN);
 }
+
+void print_term(char *path){
+  //using the path (log.txt), clear and then print the log
+  resize_term();
+  draw_penguin(0,0);
+  printf(": in print_term\n");
+}
