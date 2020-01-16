@@ -201,6 +201,12 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   noecho(); //so that what you type doesn't show up on the screen
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 
+  if(has_colors() == FALSE)
+	{	endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+
   //our three boxes
 	height = LINES - 2;
 	width = COLS / 2;
@@ -246,20 +252,28 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 }
 
 void background(WINDOW **game_win, WINDOW **type_win) {
+  start_color();			/* Start color 			*/
+	init_pair(1, COLOR_RED, COLOR_BLUE);
+	attron(COLOR_PAIR(1));
+
   wmove(*game_win, LINES - 7, 0);
   int i = 0;
   while(i < COLS / 2){
-    mvwprintw(*game_win, LINES - 7, i, "_");
+    mvwaddch(*game_win, LINES - 7, i, ACS_HLINE);
     i++;
   }
   //mvwprintw(*game_win, 2, 5, "A");
   wrefresh(*game_win);
+
+  attroff(COLOR_PAIR(1));
 }
 
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
   mvwprintw(*game_win, y, x, " ");
   background(game_win, type_win);
-  mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
+  wmove(*game_win, y + y_move, x + x_move);
+  waddch(*game_win, ACS_BLOCK);
+  //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
   wmove(*type_win, 0, 0); //Moves cursor back to type window
   wrefresh(*game_win);
   wrefresh(*type_win);
