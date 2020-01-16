@@ -30,10 +30,8 @@ almaT -- 2020-01-05 13:27
 
 almaT -- 2020-01-05 18:57
     -started creating chat log
-    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the
-     chat as a text file, but my 2 clients can't access it at the same time bc they share the same directory (i think if
-     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer.
-     I should implement some sort of check that decides
+    -issue is that i'm currently storing the chat as a text file, but my 2 clients can't access it at the same
+     time bc they share the same directory (i think if it were 2 seperate computers, it would work)
 
 almaT -- 2020-01-06 0:23
     -to try to fix aformentioned issue, created "touch_log" var in client. if multiple clients from same directory, only one
@@ -41,10 +39,6 @@ almaT -- 2020-01-06 0:23
 
 almaT -- 2020-01-06 10:57
     -fixed one-message issue from earlier.
-    -NOTE TO SELF: started making it so cnx_info is sent to client too, so you can see who sent which message.
-     note that i just put write(SHM[i].sd, &cnx_info, sizeof( struct cnx_header)); in process_queue; issue is cnx_info isn't passed
-     from main function to process_queue; so pass it? or make client send it? not suer which to choose (b/c they'd be sending their info
-     every time they send a message when we keep that info the second they make a connection
 
 almaT -- 2020-01-06 23:16
     -So username is being written to file, but it's j the username of the client that can touch the file. I guess i'm getting the
@@ -58,9 +52,28 @@ hilaryZ -- 2020-01-08 01:31
 hilaryZ -- 2020-01-09 00:58
     -added test files using ncurses to sdl_practice folder on the sdl branch
     -created layout of three windows that will contain the user's game, chat, and message being typed
-    -finished comprehending Kiran's work (yea... that took long) 
-    -and started creating chat log
-    -issue is that im testing on homer, bart and lisa (homer is server, others are clients). i'm currently storing the 
-     chat as a text file, but my 2 clients can't access it at the same time bc they share the same directory (i think if
-     it were 2 seperate computers, it would work). is this just screaming shared mem? i guess if it's on the same computer. 
-     I should implement some sort of check that decides
+    
+ almaT -- 2020-01-07 
+    -changed render.c and dupped so that we can write to file and print file to stdout
+    
+ almaT -- 2020-01-08
+    -fixed the username error, now username of that who sent the message is added to log
+    
+ almaT -- 2020-01-09
+    -started using ncurses, major windowing addition. currently have 3 box windows, working on typing in bottom chat and getting
+     to print in top chat
+    -current error: special characters not being caught?
+  
+ almaT -- 2020-01-10
+    -changed window structure, made windows.c a lot more modular, got rid of boxes so no weird typing over border
+    -attempted adding backspace functionality
+ 
+ almaT -- 2020-01-10
+    -noticed issue where if you type 'hey what's up' and then backspace and write 'hi', 'hiy what's up' will be sent 
+ 
+ almaT -- 2020-01-13
+    -fixed the above issue by creating 'size' variable along w the preexisting counter 'i'
+    
+ almaT -- 2020-01-14
+    -fixed not sending whole chat bc of wrong variable sent in server
+    -can switch between windows, undefined behavior if you use up and down arrow keys
