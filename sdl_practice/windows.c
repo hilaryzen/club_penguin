@@ -206,6 +206,9 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 		printf("Your terminal does not support color\n");
 		exit(1);
 	}
+  start_color();			/* Start color 			*/
+	init_pair(1, COLOR_YELLOW, COLOR_GREEN);
+  init_pair(2, COLOR_RED, COLOR_BLACK);
 
   //our three boxes
 	height = LINES - 2;
@@ -252,16 +255,17 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 }
 
 void background(WINDOW **game_win, WINDOW **type_win) {
-  start_color();			/* Start color 			*/
-	init_pair(1, COLOR_RED, COLOR_BLUE);
 	attron(COLOR_PAIR(1));
 
   wmove(*game_win, LINES - 7, 0);
+  whline(*game_win, ACS_HLINE, COLS / 2);
+  /*
   int i = 0;
   while(i < COLS / 2){
     mvwaddch(*game_win, LINES - 7, i, ACS_HLINE);
     i++;
   }
+  */
   //mvwprintw(*game_win, 2, 5, "A");
   wrefresh(*game_win);
 
@@ -269,10 +273,18 @@ void background(WINDOW **game_win, WINDOW **type_win) {
 }
 
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
+  //1: yellow and green
+  //2: red and black
+  wattron(*game_win, COLOR_PAIR(1));
   mvwprintw(*game_win, y, x, " ");
-  background(game_win, type_win);
+  wmove(*game_win, LINES - 7, 0);
+  whline(*game_win, ACS_HLINE, COLS / 2);
+  wattroff(*game_win, COLOR_PAIR(1));
+
+  wattron(*game_win, COLOR_PAIR(2));
   wmove(*game_win, y + y_move, x + x_move);
   waddch(*game_win, ACS_BLOCK);
+  wattroff(*game_win, COLOR_PAIR(2));
   //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
   wmove(*type_win, 0, 0); //Moves cursor back to type window
   wrefresh(*game_win);
