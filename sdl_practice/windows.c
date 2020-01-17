@@ -209,7 +209,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   start_color();			/* Start color 			*/
   init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	init_pair(3, COLOR_YELLOW, COLOR_GREEN);
-  init_pair(2, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_RED, COLOR_YELLOW);
   init_pair(4, COLOR_BLUE, COLOR_BLUE);
 
   //our three boxes
@@ -285,7 +285,7 @@ void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, i
 
   //Print grass
   wattron(*game_win, COLOR_PAIR(3));
-  int b = LINES - 7;
+  int b = 3;
   int a = 0;
   while (b <= LINES - 2) {
     while (a <= COLS / 2 - 1) {
@@ -301,7 +301,7 @@ void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, i
   wattron(*game_win, COLOR_PAIR(4));
   b = 0;
   a = 0;
-  while (b <= LINES - 8) {
+  while (b <= 2) {
     while (a <= COLS / 2 - 1) {
       mvwprintw(*game_win, b, a, " ");
       a++;
