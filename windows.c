@@ -58,8 +58,12 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       int y, x;
     case KEY_BACKSPACE:
       deletechar(message,i);
+      i--;
+      size--;
       getyx(*type_win, y, x);
-      wmove(*type_win, y, x-1);
+      //wmove(*type_win, y, x-1);
+      mvwprintw(*type_win,0,0,message);
+      wmove(*type_win,y,i);
       wrefresh(*type_win);
       break;
     case KEY_DC:
@@ -98,7 +102,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       wrefresh(*type_win);
       break;
     case KEY_RIGHT:
+      insertchar(message, i, ' ');
       i++;
+      //size++;
+      //instead, we should check in sending message whether or not i = size-1. if yes then we have to increment size
       getyx(*type_win, y, x);
       wmove(*type_win, y, x+1);
       wrefresh(*type_win);
@@ -186,7 +193,8 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 					 * everty thing to me 		*/
   noecho(); //so that what you type doesn't show up on the screen
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
-
+  //scrollok(*chat_win, TRUE);
+  //scrollok(*type_win, TRUE);
   //our three boxes
 	height = LINES - 2;
 	width = COLS / 2;
