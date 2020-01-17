@@ -207,8 +207,10 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 		exit(1);
 	}
   start_color();			/* Start color 			*/
-	init_pair(1, COLOR_YELLOW, COLOR_GREEN);
+  init_pair(1, COLOR_BLACK, COLOR_WHITE);
+	init_pair(3, COLOR_YELLOW, COLOR_GREEN);
   init_pair(2, COLOR_RED, COLOR_BLACK);
+  init_pair(4, COLOR_BLUE, COLOR_BLUE);
 
   //our three boxes
 	height = LINES - 2;
@@ -273,13 +275,41 @@ void background(WINDOW **game_win, WINDOW **type_win) {
 }
 
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
-  //1: yellow and green
+  //4: blue and blue
+  //3: yellow and green
   //2: red and black
+  //1: black and white
   wattron(*game_win, COLOR_PAIR(1));
   mvwprintw(*game_win, y, x, " ");
-  wmove(*game_win, LINES - 7, 0);
-  whline(*game_win, ACS_HLINE, COLS / 2);
   wattroff(*game_win, COLOR_PAIR(1));
+
+  //Print grass
+  wattron(*game_win, COLOR_PAIR(3));
+  int b = LINES - 7;
+  int a = 0;
+  while (b <= LINES - 2) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(3));
+
+  //Print sky
+  wattron(*game_win, COLOR_PAIR(4));
+  b = 0;
+  a = 0;
+  while (b <= LINES - 8) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(4));
 
   wattron(*game_win, COLOR_PAIR(2));
   wmove(*game_win, y + y_move, x + x_move);
