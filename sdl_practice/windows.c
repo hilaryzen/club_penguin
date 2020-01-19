@@ -17,6 +17,12 @@ int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh ty
 void background(WINDOW **game_win, WINDOW **type_win);
 void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move);
 
+struct penguin {
+  char *username;
+  int x;
+  int y;
+};
+
 int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
