@@ -36,7 +36,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz, , int *on_game_win){
+int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz, int *on_game_win){
   int i = *ind;
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
