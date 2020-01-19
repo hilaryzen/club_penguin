@@ -77,22 +77,32 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
 	break;
       */
     case KEY_UP:
-      if (on_game_win) {
+      if (!on_game_win) {
         i--;
         getyx(*type_win, y, x);
         wmove(*type_win, y-1, x);
         //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
         i = x * (y);
         wrefresh(*type_win);
+      } else {
+        getyx(*game_win, y, x);
+        if (y > 1) {
+          display_A(game_win, type_win, y, x, -1, 0);
+        }
       }
       break;
     case KEY_DOWN:
-      if (on_game_win) {
+      if (!on_game_win) {
         i--;
         getyx(*type_win, y, x);
         wmove(*type_win, y+1, x);
         i = x * (y+2);
         wrefresh(*type_win);
+      } else {
+        getyx(*game_win, y, x);
+        if (y < LINES - 3) {
+          display_A(game_win, type_win, y, x, 1, 0);
+        }
       }
       break;
     case KEY_LEFT:
@@ -101,6 +111,11 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         getyx(*type_win, y, x);
         wmove(*type_win, y, x-1);
         wrefresh(*type_win);
+      } else {
+        getyx(*game_win, y, x);
+        if (x > 0) {
+          display_A(game_win, type_win, y, x, 0, -1);
+        }
       }
       break;
     case KEY_RIGHT:
@@ -109,6 +124,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         getyx(*type_win, y, x);
         wmove(*type_win, y, x+1);
         wrefresh(*type_win);
+      } else {
+        if (x < COLS / 2 - 3) {
+          display_A(game_win, type_win, y, x, 0, 1);
+        }
       }
       break;
     case KEY_F(1):
@@ -246,6 +265,53 @@ int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   destroy_win(*chat_win);
   destroy_win(*type_win);
   return 0;
+}
+
+void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
+  //4: blue and blue
+  //3: yellow and green
+  //2: red and black
+  //1: black and white
+  wattron(*game_win, COLOR_PAIR(1));
+  mvwprintw(*game_win, y, x, " ");
+  wattroff(*game_win, COLOR_PAIR(1));
+
+  //Print grass
+  wattron(*game_win, COLOR_PAIR(3));
+  int b = 3;
+  int a = 0;
+  while (b <= LINES - 2) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(3));
+
+  //Print sky
+  wattron(*game_win, COLOR_PAIR(4));
+  b = 0;
+  a = 0;
+  while (b <= 2) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(4));
+
+  wattron(*game_win, COLOR_PAIR(2));
+  wmove(*game_win, y + y_move, x + x_move);
+  waddch(*game_win, ACS_BLOCK);
+  wattroff(*game_win, COLOR_PAIR(2));
+  //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
+  wmove(*type_win, 0, 0); //Moves cursor back to type window
+  wrefresh(*game_win);
+  wrefresh(*type_win);
 }
 
 void destroy_win(WINDOW *local_win){
