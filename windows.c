@@ -119,7 +119,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       return -1;
       break;
     case KEY_F(2):
-      on_game_win = 1;
+      *on_game_win = 1;
       wmove(*game_win, 1, 1);
       wrefresh(*game_win);
       //actually some function should be called, called "interact with game" -- hilary's thing, it can have
@@ -127,7 +127,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //hm but this on it's own will return to typing bar if you press a character
       break;
     case KEY_F(3):
-      on_game_win = 0;
+      *on_game_win = 0;
       wmove(*type_win, 0, 0);
       wrefresh(*type_win);
       break;
