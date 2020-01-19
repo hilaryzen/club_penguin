@@ -36,7 +36,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz){
+int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz, , int *on_game_win){
   int i = *ind;
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
@@ -77,31 +77,39 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
 	break;
       */
     case KEY_UP:
-      i--;
-      getyx(*type_win, y, x);
-      wmove(*type_win, y-1, x);
-      //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
-      i = x * (y);
-      wrefresh(*type_win);
+      if (on_game_win) {
+        i--;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y-1, x);
+        //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+        i = x * (y);
+        wrefresh(*type_win);
+      }
       break;
     case KEY_DOWN:
-      i--;
-      getyx(*type_win, y, x);
-      wmove(*type_win, y+1, x);
-      i = x * (y+2);
-      wrefresh(*type_win);
+      if (on_game_win) {
+        i--;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y+1, x);
+        i = x * (y+2);
+        wrefresh(*type_win);
+      }
       break;
     case KEY_LEFT:
-      i--;
-      getyx(*type_win, y, x);
-      wmove(*type_win, y, x-1);
-      wrefresh(*type_win);
+      if (on_game_win) {
+        i--;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y, x-1);
+        wrefresh(*type_win);
+      }
       break;
     case KEY_RIGHT:
-      i++;
-      getyx(*type_win, y, x);
-      wmove(*type_win, y, x+1);
-      wrefresh(*type_win);
+      if (on_game_win) {
+        i++;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y, x+1);
+        wrefresh(*type_win);
+      }
       break;
     case KEY_F(1):
       wmove(*chat_win, 1, 1);
@@ -111,6 +119,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       return -1;
       break;
     case KEY_F(2):
+      on_game_win = 1;
       wmove(*game_win, 1, 1);
       wrefresh(*game_win);
       //actually some function should be called, called "interact with game" -- hilary's thing, it can have
@@ -118,6 +127,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //hm but this on it's own will return to typing bar if you press a character
       break;
     case KEY_F(3):
+      on_game_win = 0;
       wmove(*type_win, 0, 0);
       wrefresh(*type_win);
       break;

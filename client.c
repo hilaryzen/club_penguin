@@ -32,6 +32,7 @@ int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
   WINDOW *type_win;
+  int on_game_win = 0; //Tracks if user is on game win or type win
   int log_fd; // file descriptor for log.txt
 
   // ARG INTERPRETATION
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
+      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size,&on_game_win) ) break;
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
