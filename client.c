@@ -89,6 +89,11 @@ int main(int argc, char *argv[]){
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       if( in_gamewin(game_win) ){
 	if( arrow_game(&game_win,&type_win,&me) ) break;
+	// once arrow has been processed, send the arrow stuff to the server
+	header.packet_type = P_PLAYERMOVE;
+	header.packet_size = sizeof( struct playermove );
+	write(sd,&header,sizeof( struct packet_header ));
+	write(sd,&me,sizeof(struct playermove));
       }else{
 	if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
       }

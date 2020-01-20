@@ -69,6 +69,7 @@ int arrow_game(WINDOW **type_win, WINDOW **game_win, struct playermove *me){
   }
   me->r = char_y;
   me->c = char_x;
+  return 0;
 }
 
 int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz){
