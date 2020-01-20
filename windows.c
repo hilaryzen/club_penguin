@@ -73,7 +73,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       insertchar(message, i, ch);
       i++;
-      size++:
+      size++;
       //
       //
       werase(*type_win);
