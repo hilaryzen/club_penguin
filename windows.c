@@ -157,9 +157,9 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_LEFT:
       //just move the cursor, and where you are on the message, but don't affect anything
       //
-      i--;
+      //i--;
       getyx(*type_win, y, x);
-      if (i%length_of_type == 1){
+      if (i%length_of_type == 0){
         //means that in 'abcd\nefg', you're at n, have to decrease i and move up to (y-1, length_of_type)
         wmove(*type_win, y-1, length_of_type);
       }else{
@@ -168,6 +168,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       }
       //wmove(*type_win, 0, i);
       wrefresh(*type_win);
+      i--;
       break;
     case KEY_RIGHT:
       //insertchar(message, i, ' ');
@@ -178,9 +179,9 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       if (i == size){
         //can't do anything
       }else{
-        i++;
+        //i++;
         getyx(*type_win, y, x);
-        if (i%length_of_type == 0){
+        if (i%length_of_type == (length_of_type - 1)){
           //means that in 'abcd\nefg', you're at d, have to increase i and move to (y+1, 0)
           wmove(*type_win, y+1, 0);
         }else{
@@ -189,6 +190,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         }
         //wmove(*type_win, 0, i);
         wrefresh(*type_win);
+        i++;
       }
       break;
     case KEY_F(1):
