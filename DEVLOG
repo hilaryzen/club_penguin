@@ -77,3 +77,9 @@ hilaryZ -- 2020-01-09 00:58
  almaT -- 2020-01-14
     -fixed not sending whole chat bc of wrong variable sent in server
     -can switch between windows, undefined behavior if you use up and down arrow keys
+
+ almaT -- 2020-01-20 02:25
+    -backspace and arrow keys were not working. not updating the chat/just completely defunct
+    -used memmove for arrow key insertion, works
+    -added extra null for backspace, works
+    -chat functionality complete, just need to add scrolling 
