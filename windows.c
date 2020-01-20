@@ -79,7 +79,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = wgetch(*type_win); //get what the user puts down
-  if (i < 126 && ch != '\n'){
+  if (size < 126 && ch != '\n'){
     int y, x;
     if (!has_key(ch)){
       //
@@ -220,7 +220,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     //
     //
     wrefresh(*type_win); //move cursor back
-  }else if (i == 126){
+  }else if (size == 126){
     // keep going until they press enter those fools
   }
   *ind = i;
