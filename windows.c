@@ -106,15 +106,22 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     //else if it's special
     switch (ch){ //switch so we can add diff stuff later
     case KEY_BACKSPACE:
-      i--;
-      size--;
-      deletechar(message, i); //you want to delete what is behind the cursor, and take it's place
+      deletechar(message, (i-1)); //you want to delete what is behind the cursor, and take it's place
       //
       //
       getyx(*type_win, y, x);
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win,0, i);
+      if (i%length_of_type == 0){
+        //means that in 'abcd\nefg', you're at n, have to decrease i and move up to (y-1, length_of_type)
+        wmove(*type_win, y-1, length_of_type);
+      }else{
+        //just move over
+        wmove(*type_win, y, x-1);
+      }
+      //wmove(*type_win,0, i);
+      i--;
+      size--;
       wrefresh(*type_win);
       break;
     case KEY_DC:
