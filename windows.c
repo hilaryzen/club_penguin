@@ -37,7 +37,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int arrows_game(WINDOW **type_win, WINDOW **game_win, struct playermove *me){
+int arrow_game(WINDOW **type_win, WINDOW **game_win, struct playermove *me){
   int char_y = me->r;
   int char_x = me->c;
   int ch = wgetch(*game_win);
@@ -367,3 +367,8 @@ void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, i
   wrefresh(*type_win);
 }
 
+int in_gamewin(WINDOW *gamewin){
+  int x,y;
+  getyx(gamewin,x,y);
+  return x==1 && y==1;
+}

@@ -28,6 +28,8 @@ int main(int argc, char *argv[]){
   /* buffers in which to put messages to be written onto the socket */
   struct packet_header header;
   union packet packet;
+  /* buffer for my current position, to be used when in game window */
+  struct playermove me;
   /* ncurses windows for typing buffer, game display, and chat window */
   WINDOW *game_win;
   WINDOW *chat_win;
@@ -85,7 +87,11 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
+      if( in_gamewin(game_win) ){
+	if( arrow_game(&game_win,&type_win,&me) ) break;
+      }else{
+	if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
+      }
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE
