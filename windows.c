@@ -129,21 +129,28 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_UP:
       //
       //
-      getyx(*type_win, y, x);
-      wmove(*type_win, y-1, x);
-      //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
-      //
-      //
-      wrefresh(*type_win);
+      if (i > 37){
+        i = i-37;
+        //getyx(*type_win, y, x);
+        wmove(*type_win, 0, i);
+        //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+        //
+        //
+        wrefresh(*type_win);
+      }
       break;
     case KEY_DOWN:
       //
       //
-      getyx(*type_win, y, x);
-      wmove(*type_win, y+1, x);
-      //
-      //
-      wrefresh(*type_win);
+      if (size >= (i+37)){ //then there is a character to latch on to
+        i = i+37;
+        //getyx(*type_win, y, x);
+        wmove(*type_win, 0, i);
+        //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+        //
+        //
+        wrefresh(*type_win);
+      }
       break;
     case KEY_LEFT:
       //just move the cursor, and where you are on the message, but don't affect anything
