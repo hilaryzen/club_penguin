@@ -69,6 +69,8 @@ int main(int argc, char *argv[]){
   wmove(type_win, 0, 0); //set cursor
   char message[128];
   memset(message,0,sizeof(message));
+  //ALMA ADDING -- ENSURE NULL TERMINATION FROM START
+  message[0] = '\0';
   //char *to_send;
   int i = 0;
   int size = 0;

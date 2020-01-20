@@ -11,17 +11,44 @@
 //PATH = "log.txt"
 
 void insertchar(char *buf,int i,char c){
-  int j = strlen(buf);
-  buf[j+1] = '\0';
-  while(j > i){
-    buf[j] = buf[--j];
+  if (i == strlen(buf)){
+    //so 'abc\0', if i is three just add to end 'abci\0'
+    //even if it's j an empty message, it will be '\0' which has len zero so still caught by this
+    buf[i] = c;
+    buf[i+1] = '\0';
+  }else{
+    int j = strlen(buf);
+    buf[j+1] = '\0';
+    //say i is 2 and you have 'abcd\0' --> now it's 'abcd\0\0'
+    //j = 4 and i is 2 so
+    //j4,i2: 'abcdd\0' --> j=3
+    //j3, i2: 'abccd\0' --> j=2
+    while(j > i){
+      buf[j] = buf[--j];
+    }
+    //now j2, i2, so: 'abCcd\0'
+    buf[i] = c;
   }
-  buf[i] = c;
+  //i needs to be incremented after this, so the cursor remain behind what it was originally behind
+  //size also must be incremented
+  //this functionality should be like you can only add behind something,
+  //and if you want to delete it, move the cursor infront and then hit backspace
 }
 
 void deletechar(char *buf,int i){
-  while(buf[i]){
-    buf[i] = buf[++i];
+  if (i == strlen(buf)){
+    //don't delete the last null!
+    //just don't do anything
+    //there should also be a catch in backspacing that prevents
+    //decrementing i past zero
+  }else{
+    //'abcd\0', say i = 2, we want 'abd\0'.
+    //i = 2, 'abcd\0'-->'abdd\0', now i =3
+    //i = 3, 'abdd\0' --> 'abd/0/0'
+    //the length of our buffer should update to just 3 so it should stop here
+    while(i<strlen(buf)){
+      buf[i] = buf[++i];
+    }
   }
 }
 
@@ -43,14 +70,17 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
   int ch = wgetch(*type_win); //get what the user puts down
   if (i < 126 && ch != '\n'){
     if (!has_key(ch)){
-      insertchar(message,i,ch);
+      //
+      insertchar(message, i, ch);
       i++;
-      size++;
+      size++:
+      //
+      //
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
       wmove(*type_win,0,i);
-      // waddch(*type_win, ch); //add it back to the window, but only if it isn't special
-      //waddch(*type_win, ' ');
+      //
+      //
       wrefresh(*type_win); //refresh the window
     }
     //else if it's special
@@ -59,15 +89,20 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_BACKSPACE:
       i--;
       size--;
-      deletechar(message,i);
+      deletechar(message, i); //you want to delete what is behind the cursor, and take it's place
+      //
+      //
       getyx(*type_win, y, x);
-      //wmove(*type_win, y, x-1);
       mvwprintw(*type_win,0,0,message);
       wmove(*type_win,y,i);
       wrefresh(*type_win);
       break;
     case KEY_DC:
       i--;
+      size--;
+      deletechar(message, i); //you want to delete what is behind the cursor, and take it's place
+      //
+      //
       getyx(*type_win, y, x);
       wmove(*type_win, y, x-1);
       wrefresh(*type_win);
@@ -81,21 +116,27 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
 	break;
       */
     case KEY_UP:
-      i--;
+      //
+      //
       getyx(*type_win, y, x);
       wmove(*type_win, y-1, x);
       //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
-      i = x * (y);
+      //
+      //
       wrefresh(*type_win);
       break;
     case KEY_DOWN:
-      i--;
+      //
+      //
       getyx(*type_win, y, x);
       wmove(*type_win, y+1, x);
-      i = x * (y+2);
+      //
+      //
       wrefresh(*type_win);
       break;
     case KEY_LEFT:
+      //just move the cursor, and where you are on the message, but don't affect anything
+      //
       i--;
       getyx(*type_win, y, x);
       wmove(*type_win, y, x-1);
@@ -103,15 +144,18 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       break;
     case KEY_RIGHT:
       //insertchar(message, i, ' ');
-      if (i == size){
-        insertchar(message, i, ' ');
-      }
-      i++;
+      //FOR NOW, DON'T ALLOW I TO INCREMENT PAST SIZE!
+      //
       //size++;
       //instead, we should check in sending message whether or not i = size-1. if yes then we have to increment size
-      getyx(*type_win, y, x);
-      wmove(*type_win, y, x+1);
-      wrefresh(*type_win);
+      if (i == size){
+        //can't do anything
+      }else{
+        i++;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y, x+1);
+        wrefresh(*type_win);
+      }
       break;
     case KEY_F(1):
       wmove(*chat_win, 1, 1);
@@ -144,15 +188,19 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     // initiate chat sending process
     //networking stuff
     werase(*type_win);
-    insertchar(message,size,'\n');
-    //something wrong w size after using arrow keys
+    insertchar(message, i, '\n');
     size++;
+    //
+    //
     sendchat(message, size);
+    size = 0;
+    i = 0;
     // add_to_log(message, size+1); //we use i to see if write fails
     // print_log(chat_win);//print the log to the chat window
     memset(message,0,128);
-    i = 0; //reset the message
-    size = 0;
+    message[0] = '\0';
+    //
+    //
     wrefresh(*type_win); //move cursor back
   }else if (i == 126){
     // keep going until they press enter those fools
