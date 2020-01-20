@@ -8,7 +8,8 @@
 enum packet_t {
   P_CNX_HEADER,
   P_CHATMSG,
-  P_PLAYERMOVE
+  P_PLAYERMOVE,
+  P_GOODBYE
 };
 
 struct packet_header {

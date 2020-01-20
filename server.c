@@ -169,6 +169,10 @@ void subserver_listen(int id,int qd){
   }
   // end of socket, or an error in reading the header
   printf("[subserver %d] socket is gone or bad data sent\n",getpid());
+  header.packet_type = P_GOODBYE;
+  header.packet_size = 0;
+  header.id = id;
+  qwrite(&header,&packet,qd);
   // update the shared memory to indicate this id space as empty
   sem_claim(SEMD,SHM_SEMA);
   SHM[id].id = -1;

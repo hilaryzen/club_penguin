@@ -30,6 +30,7 @@ int main(int argc, char *argv[]){
   union packet packet;
   /* array for storing current state of all players */
   struct cnx_header users[MAX_CNX];
+  for( r=0; r<MAX_CNX; r++ ) users[r].id = -1;
   int id; // my identifier
   /* ncurses windows for typing buffer, game display, and chat window */
   WINDOW *game_win;
@@ -138,6 +139,14 @@ int main(int argc, char *argv[]){
 	wrefresh(type_win);
 	// do stuff for updating screen
 	users[ header.id ] = packet.CNX_HEADER;
+	break;
+      case P_GOODBYE:
+	sprintf(msgbuffer,"%s has left the game\n",users[ header.id ].username);
+	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
+	print_log(&chat_win,log_fd);
+	wrefresh(type_win);
+
+	users[ header.id ].id = -1;
 	break;
       }
     }
