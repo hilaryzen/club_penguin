@@ -60,7 +60,7 @@ void deletechar(char *buf,int i){
     }
     buf[j-1] = '\0'; //i hope this works
     */
-    memmove(&buf[i-1], &buf[i], (strlen(buf) - i)+1);
+    memmove(&buf[i], &buf[i+1], (strlen(buf) - i)+1);
   }
 
 }
