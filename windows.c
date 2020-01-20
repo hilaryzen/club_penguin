@@ -143,7 +143,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_DOWN:
       //
       //
-      if (size >= (i+length_of_type)){ //then there is a character to latch on to
+      if (size >= (i+length_of_type-1)){ //then there is a character to latch on to
         i = i+length_of_type;
         //getyx(*type_win, y, x);
         wmove(*type_win, 0, i);
