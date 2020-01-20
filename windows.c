@@ -152,8 +152,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       if (i > length_of_type){
         i = i-length_of_type;
-        //getyx(*type_win, y, x);
-        wmove(*type_win, 0, i);
+        getyx(*type_win, y, x);
+        wmove(*type_win, y-1, x);
 
         //
         wrefresh(*type_win);
@@ -164,8 +164,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       if (size >= (i+length_of_type-1)){ //then there is a character to latch on to
         i = i+length_of_type;
-        //getyx(*type_win, y, x);
-        wmove(*type_win, 0, i);
+        getyx(*type_win, y, x);
+        wmove(*type_win, y+1, x);
         //
         //
         wrefresh(*type_win);
