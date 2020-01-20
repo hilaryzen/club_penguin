@@ -112,13 +112,19 @@ int main(int argc, char *argv[]){
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
-      packet.CHATMSG.message[header.packet_size] = '\0';
-      char msgbuffer[256];
-      memset(msgbuffer,0,sizeof(msgbuffer));
-      sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
-      add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
-      print_log(&chat_win,log_fd);
-      wrefresh(type_win);
+      switch(header.packet_type){
+      case P_CHATMSG:
+	packet.CHATMSG.message[header.packet_size] = '\0';
+	char msgbuffer[256];
+	memset(msgbuffer,0,sizeof(msgbuffer));
+	sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
+	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
+	print_log(&chat_win,log_fd);
+	wrefresh(type_win);
+	break;
+      case P_PLAYERMOVE:
+	
+      }
     }
   }
 
