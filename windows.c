@@ -84,16 +84,23 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     if (!has_key(ch)){
       //
       insertchar(message, i, ch);
-      i++;
-      size++;
       //
       getyx(*type_win, y, x);
       //
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win, 0, i);
+      if (i%length_of_type == (length_of_type - 1)){
+        //means that in 'abcd\nefg', you're at d, have to increase i and move to (y+1, 0)
+        wmove(*type_win, y+1, 0);
+      }else{
+        //just move over
+        wmove(*type_win, y, x+1);
+      }
+      //wmove(*type_win, 0, i);
       //
       //
+      i++;
+      size++;
       wrefresh(*type_win); //refresh the window
     }
     //else if it's special
