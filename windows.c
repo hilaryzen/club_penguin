@@ -43,12 +43,13 @@ void insertchar(char *buf,int i,char c){
 }
 
 void deletechar(char *buf,int i){
-  if (i == strlen(buf)){
+  if (i == strlen(buf) || i == 0){ //don't want to get seg fault for deleting part of message that isn't ours
     //don't delete the last null!
     //just don't do anything
     //there should also be a catch in backspacing that prevents
     //decrementing i past zero
   }else{
+    /*
     //'abcd\0', say i = 2, we want 'abd\0'.
     //i = 2, 'abcd\0'-->'abdd\0', now i =3
     //i = 3, 'abdd\0' --> 'abd/0/0'
@@ -58,6 +59,8 @@ void deletechar(char *buf,int i){
       buf[i] = buf[++i];
     }
     buf[j-1] = '\0'; //i hope this works
+    */
+    memmove(&buf[i-1], &buf[i], (strlen(buf) - i)+1);
   }
 
 }
