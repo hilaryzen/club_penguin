@@ -50,8 +50,9 @@ void deletechar(char *buf,int i){
     while(i<j){
       buf[i] = buf[++i];
     }
+    buf[j-1] = '\0'; //i hope this works 
   }
-  
+
 }
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
