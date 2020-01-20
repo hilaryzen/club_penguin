@@ -266,3 +266,69 @@ void destroy_win(WINDOW *local_win){
 	wrefresh(local_win);
 	delwin(local_win);
 }
+
+void background(WINDOW **game_win, WINDOW **type_win) {
+	attron(COLOR_PAIR(1));
+
+  wmove(*game_win, LINES - 7, 0);
+  whline(*game_win, ACS_HLINE, COLS / 2);
+  /*
+  int i = 0;
+  while(i < COLS / 2){
+    mvwaddch(*game_win, LINES - 7, i, ACS_HLINE);
+    i++;
+  }
+  */
+  //mvwprintw(*game_win, 2, 5, "A");
+  wrefresh(*game_win);
+
+  attroff(COLOR_PAIR(1));
+}
+
+void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
+  //4: blue and blue
+  //3: yellow and green
+  //2: red and black
+  //1: black and white
+  wattron(*game_win, COLOR_PAIR(1));
+  mvwprintw(*game_win, y, x, " ");
+  wattroff(*game_win, COLOR_PAIR(1));
+
+  //Print grass
+  wattron(*game_win, COLOR_PAIR(3));
+  int b = 3;
+  int a = 0;
+  while (b <= LINES - 2) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(3));
+
+  //Print sky
+  wattron(*game_win, COLOR_PAIR(4));
+  b = 0;
+  a = 0;
+  while (b <= 2) {
+    while (a <= COLS / 2 - 1) {
+      mvwprintw(*game_win, b, a, " ");
+      a++;
+    }
+    a = 0;
+    b++;
+  }
+  wattroff(*game_win, COLOR_PAIR(4));
+
+  wattron(*game_win, COLOR_PAIR(2));
+  wmove(*game_win, y + y_move, x + x_move);
+  waddch(*game_win, ACS_BLOCK);
+  wattroff(*game_win, COLOR_PAIR(2));
+  //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
+  wmove(*type_win, 0, 0); //Moves cursor back to type window
+  wrefresh(*game_win);
+  wrefresh(*type_win);
+}
+
