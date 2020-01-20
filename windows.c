@@ -17,6 +17,7 @@ void insertchar(char *buf,int i,char c){
     buf[i] = c;
     buf[i+1] = '\0';
   }else{
+    /*
     int j = strlen(buf);
     buf[j+1] = '\0';
     //say i is 2 and you have 'abcd\0' --> now it's 'abcd\0\0'
@@ -26,7 +27,13 @@ void insertchar(char *buf,int i,char c){
     while(j > i){
       buf[j] = buf[--j];
     }
+    */
+    //a dif way to do this: memmove()
+    //'abcdefg\0', want to instert char at i = 3. then we move from 3-strlen, inclusive, to 4. then add to 3
     //now j2, i2, so: 'abCcd\0'
+    //how much you're copying is = to (strlen - i) + 1, to account for the null
+    //where i learned abt this: https://viewsourcecode.org/snaptoken/kilo/05.aTextEditor.html
+    memmove(buv[i+1], buf[i], (strlen(buf) - i)+1);
     buf[i] = c;
   }
   //i needs to be incremented after this, so the cursor remain behind what it was originally behind
