@@ -163,7 +163,8 @@ void sendchat(char *msg, int size){
   memset(&message,0,sizeof(struct chatmsg));
   //alma adding that you fill in header to have username too
   strncpy(header.username, cnx_info.username,16);
-  strncpy(message.message,msg,size);
+  //undo this soon
+  strcpy(message.message,msg);
   //
   header.packet_type = P_CHATMSG;
   header.packet_size = strlen(message.message);
