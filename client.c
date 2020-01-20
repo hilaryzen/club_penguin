@@ -65,13 +65,13 @@ int main(int argc, char *argv[]){
   printf("[client] setup on sd %d\n",sd);
   write(sd,&proposed_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
-  read(sd,&proposed_info,sizeof(struct cnx_header));
+  read(sd,&users,MAX_CNX * sizeof(struct cnx_header));
+  read(sd,&id,sizeof(int));
   printf("[client] received completed header\n");
-  users[ proposed_info.id ] = proposed_info;
-  id = proposed_info.id;
   
   // CONFIGURE WINDOWS
-  exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
+  r = setup(&game_win,&chat_win,&type_win);
+  printf("hmmmm\n");
 
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);

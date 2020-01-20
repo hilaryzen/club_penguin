@@ -67,7 +67,8 @@ int main(){
     SHM[id].id = id; // this indicates that the spot is now in use, id is no longer -1
     SHM[id].sd = client_sd;
     sem_release(SEMD,SHM_SEMA);
-    write(client_sd,SHM+id,sizeof(struct cnx_header));
+    write(client_sd,SHM, MAX_CNX * sizeof(struct cnx_header));
+    write(client_sd,&id,sizeof(int));
     // fork off the subserver process!
     f = fork();
     if(!f){

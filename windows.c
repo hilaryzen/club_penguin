@@ -222,21 +222,22 @@ int print_log(WINDOW **log_window,int fd){
   return 0;
 }
 int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
-	int startx, starty, width, height;
+  int startx, starty, width, height;
   printf("in setup\n");
-	initscr();			/* Start curses mode 		*/
-	cbreak();			/* Line buffering disabled, Pass on
-					 * everty thing to me 		*/
+  initscr();			/* Start curses mode 		*/
+  cbreak();			/* Line buffering disabled, Pass on
+				 * everty thing to me 		*/
   noecho(); //so that what you type doesn't show up on the screen
-	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
+  keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
+  printw("HEY\n");
   //scrollok(*chat_win, TRUE);
   //scrollok(*type_win, TRUE);
   //our three boxes
-	height = LINES - 2;
-	width = COLS / 2;
-	starty = 1;	/* Calculating for a center placement */
-	startx = 1;	/* of the window		*/
-	printw("F1: Exit, F2: Move avatar, F3: Type chat, F4: Scroll chat");
+  height = LINES - 2;
+  width = COLS / 2;
+  starty = 1;	/* Calculating for a center placement */
+  startx = 1;	/* of the window		*/
+  printw("F1: Exit, F2: Move avatar, F3: Type chat, F4: Scroll chat");
   //move cursor to middle and for height of screen draw vertical line
   int pos = width; //xcor
   int i = 1;
@@ -271,6 +272,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   //DONT redraw the box
   wrefresh(*type_win);
   // // //don't need box for type
+  printf("is it not finishing this?\n");
 
   return 0; //just to show that it works
 }
