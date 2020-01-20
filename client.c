@@ -34,6 +34,8 @@ int main(int argc, char *argv[]){
   WINDOW *type_win;
   int on_game_win = 0; //Tracks if user is on game win or type win
   int log_fd; // file descriptor for log.txt
+  struct penguin p;
+  struct penguin *pp = &p;
 
   // ARG INTERPRETATION
   if (argc == 1) host = LOCALHOST; // default server, when unspecified, is localhost (127.0.0.1)
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]){
   printf("[client] wrote connection header\n");
 
   // CONFIGURE WINDOWS
-  exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
+  exit_err( setup(&game_win,&chat_win,&type_win, pp) , "configure ncurses windows" );
 
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]){
 
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
-      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size,&on_game_win) ) break;
+      if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size,&on_game_win,pp) ) break;
     }
 
     // IF SOCKET IS READY: HANDLE SERVER MESSAGE

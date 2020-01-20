@@ -36,7 +36,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz, int *on_game_win){
+int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz, int *on_game_win, struct penguin *p){
   int i = *ind;
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
@@ -85,10 +85,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         i = x * (y);
         wrefresh(*type_win);
       } else {
-        getyx(*game_win, y, x);
         if (y > 1) {
-          display_A(game_win, type_win, y, x, -1, 0);
+          display_A(game_win, type_win, p->y, p->x, -1, 0);
         }
+        p->y -= 1;
       }
       break;
     case KEY_DOWN:
@@ -99,10 +99,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         i = x * (y+2);
         wrefresh(*type_win);
       } else {
-        getyx(*game_win, y, x);
         if (y < LINES - 3) {
-          display_A(game_win, type_win, y, x, 1, 0);
+          display_A(game_win, type_win, p->y, p->x, 1, 0);
         }
+        p->y += 1;
       }
       break;
     case KEY_LEFT:
@@ -112,10 +112,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         wmove(*type_win, y, x-1);
         wrefresh(*type_win);
       } else {
-        getyx(*game_win, y, x);
         if (x > 0) {
-          display_A(game_win, type_win, y, x, 0, -1);
+          display_A(game_win, type_win, p->y, p->x, 0, -1);
         }
+        p->x -= 1;
       }
       break;
     case KEY_RIGHT:
@@ -126,8 +126,9 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         wrefresh(*type_win);
       } else {
         if (x < COLS / 2 - 3) {
-          display_A(game_win, type_win, y, x, 0, 1);
+          display_A(game_win, type_win, p->y, p->x, 0, 1);
         }
+        p->x += 1;
       }
       break;
     case KEY_F(1):
@@ -207,7 +208,7 @@ int print_log(WINDOW **log_window,int fd){
   }
   return 0;
 }
-int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win, struct penguin *p){
 	int startx, starty, width, height;
   printf("in setup\n");
 	initscr();			/* Start curses mode 		*/
@@ -256,6 +257,10 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   //DONT redraw the box
   wrefresh(*type_win);
   // // //don't need box for type
+
+  p->username = "user";
+  p->y = LINES / 2;
+  p->x = COLS / 4;
 
   return 0; //just to show that it works
 }
