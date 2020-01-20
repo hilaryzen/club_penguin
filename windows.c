@@ -192,7 +192,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     // initiate chat sending process
     //networking stuff
     werase(*type_win);
-    insertchar(message, i, '\n');
+    insertchar(message, size, '\n');
     size++;
     //
     //
