@@ -66,6 +66,7 @@ int main(int argc, char *argv[]){
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  scrollok(chat_win, TRUE);
   wmove(type_win, 0, 0); //set cursor
   char message[128];
   memset(message,0,sizeof(message));
