@@ -80,23 +80,24 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
   //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = wgetch(*type_win); //get what the user puts down
   if (i < 126 && ch != '\n'){
+    int y, x;
     if (!has_key(ch)){
       //
       insertchar(message, i, ch);
       i++;
       size++;
       //
+      getyx(*type_win, y, x);
       //
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win,0,i);
+      wmove(*type_win, y, x-1);
       //
       //
       wrefresh(*type_win); //refresh the window
     }
     //else if it's special
     switch (ch){ //switch so we can add diff stuff later
-      int y, x;
     case KEY_BACKSPACE:
       i--;
       size--;
