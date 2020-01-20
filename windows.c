@@ -46,10 +46,12 @@ void deletechar(char *buf,int i){
     //i = 2, 'abcd\0'-->'abdd\0', now i =3
     //i = 3, 'abdd\0' --> 'abd/0/0'
     //the length of our buffer should update to just 3 so it should stop here
-    while(i<strlen(buf)){
+    int j = strlen(buf);
+    while(i<j){
       buf[i] = buf[++i];
     }
   }
+  
 }
 
 WINDOW *create_newwin(int height, int width, int starty, int startx){
