@@ -109,9 +109,6 @@ int main(int argc, char *argv[]){
       print_log(&chat_win,log_fd);
       wrefresh(type_win);
     }
-    //these should be reset
-    size = 0;
-    i = 0;
   }
 
   if (cleanup(&game_win, &chat_win, &type_win)){
