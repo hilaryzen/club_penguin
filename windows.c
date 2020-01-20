@@ -57,9 +57,9 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     switch (ch){ //switch so we can add diff stuff later
       int y, x;
     case KEY_BACKSPACE:
-      deletechar(message,i);
       i--;
       size--;
+      deletechar(message,i);
       getyx(*type_win, y, x);
       //wmove(*type_win, y, x-1);
       mvwprintw(*type_win,0,0,message);
