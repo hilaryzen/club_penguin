@@ -67,6 +67,7 @@ int main(){
     SHM[id].id = id; // this indicates that the spot is now in use, id is no longer -1
     SHM[id].sd = client_sd;
     sem_release(SEMD,SHM_SEMA);
+    write(client_sd,SHM+id,sizeof(struct cnx_header));
     // fork off the subserver process!
     f = fork();
     if(!f){
@@ -150,6 +151,12 @@ void subserver_listen(int id,int qd){
   struct packet_header header;
   union packet packet;
   printf("[subserver %d] ready to listen: id %d(%d), sd %d\n",getpid(),SHM[id].id,id,SHM[id].sd);
+  // write hello message to queue
+  header.id = id;
+  header.packet_type = P_CNX_HEADER;
+  header.packet_size = sizeof( struct cnx_header );
+  qwrite( &header, (union packet *)(SHM+id), qd );
+  printf("[subserver %d] sent hello message for id %d\n",getpid(),id);
   // loops until socket closes: read message and process it (write messages to outbox)
   while( r = read(SHM[id].sd,&header,sizeof( struct packet_header )) ){
     if( r != sizeof(struct packet_header) ) break; // if not enough data is sent or there's an error, leave the loop

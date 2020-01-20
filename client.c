@@ -28,8 +28,9 @@ int main(int argc, char *argv[]){
   /* buffers in which to put messages to be written onto the socket */
   struct packet_header header;
   union packet packet;
-  /* buffer for my current position, to be used when in game window */
-  struct playermove me;
+  /* array for storing current state of all players */
+  struct cnx_header users[MAX_CNX];
+  int id; // my identifier
   /* ncurses windows for typing buffer, game display, and chat window */
   WINDOW *game_win;
   WINDOW *chat_win;
@@ -61,7 +62,11 @@ int main(int argc, char *argv[]){
   printf("[client] setup on sd %d\n",sd);
   write(sd,&cnx_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
-
+  read(sd,&cnx_info,sizeof(struct cnx_header));
+  printf("[client] received completed header\n");
+  users[ cnx_info.id ] = cnx_info;
+  id = cnx_info.id;
+  
   // CONFIGURE WINDOWS
   exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
 
@@ -88,12 +93,12 @@ int main(int argc, char *argv[]){
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       if( in_gamewin(game_win) ){
-	if( arrow_game(&game_win,&type_win,&me) ) break;
+	if( arrow_game(&game_win,&type_win,&users[id].pos) ) break;
 	// once arrow has been processed, send the arrow stuff to the server
 	header.packet_type = P_PLAYERMOVE;
 	header.packet_size = sizeof( struct playermove );
 	write(sd,&header,sizeof( struct packet_header ));
-	write(sd,&me,sizeof(struct playermove));
+	write(sd,&users[id].pos,sizeof(struct playermove));
       }else{
 	if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
       }
@@ -112,10 +117,10 @@ int main(int argc, char *argv[]){
       // in the place of this print, there would be handling of every type of packet here, updating the game state as necessary
       // printf("message: [%s]\n",packet.CHATMSG.message);
       //in the future, this will be contained in an if statement (if packet_header.packet_type == CHATMSG). for now we r only sending chats
+      char msgbuffer[256];
       switch(header.packet_type){
       case P_CHATMSG:
 	packet.CHATMSG.message[header.packet_size] = '\0';
-	char msgbuffer[256];
 	memset(msgbuffer,0,sizeof(msgbuffer));
 	sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
 	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
@@ -123,7 +128,17 @@ int main(int argc, char *argv[]){
 	wrefresh(type_win);
 	break;
       case P_PLAYERMOVE:
-	
+	// do stuff for updating screen
+	users[ header.id ].pos = packet.PLAYERMOVE;
+	break;
+      case P_CNX_HEADER:
+	sprintf(msgbuffer,"%s has joined the game\n",packet.CNX_HEADER.username);
+	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
+	print_log(&chat_win,log_fd);
+	wrefresh(type_win);
+	// do stuff for updating screen
+	users[ header.id ] = packet.CNX_HEADER;
+	break;
       }
     }
   }

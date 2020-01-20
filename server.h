@@ -1,7 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#define MAX_CNX 8
 #define KEY 91289
 
 #define CNX_SEMA 0

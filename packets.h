@@ -1,6 +1,8 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
+#define MAX_CNX 8
+
 #define PORT "2024"
 
 enum packet_t {
@@ -16,13 +18,6 @@ struct packet_header {
   enum packet_t packet_type;
 };
 
-struct cnx_header {
-  int id;
-  int sd;
-  char username[16];
-  int room;
-};
-
 struct chatmsg {
   char message[128];
 };
@@ -30,6 +25,14 @@ struct chatmsg {
 struct playermove {
   int r;
   int c;
+};
+
+struct cnx_header {
+  int id;
+  int sd;
+  char username[16];
+  int room;
+  struct playermove pos;
 };
 
 union packet {
