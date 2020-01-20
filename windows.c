@@ -91,7 +91,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win, y, x+1);
+      wmove(*type_win, 0, i);
       //
       //
       wrefresh(*type_win); //refresh the window
@@ -107,7 +107,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       getyx(*type_win, y, x);
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win,y,x-1);
+      wmove(*type_win,0, i);
       wrefresh(*type_win);
       break;
     case KEY_DC:
@@ -117,7 +117,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       //
       getyx(*type_win, y, x);
-      wmove(*type_win, y, x-1);
+      wmove(*type_win, 0, i);
       wrefresh(*type_win);
       break;
       /*
@@ -133,8 +133,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       if (i > length_of_type){
         i = i-length_of_type;
-        getyx(*type_win, y, x);
-        wmove(*type_win, y-1, x);
+        //getyx(*type_win, y, x);
+        wmove(*type_win, 0, i);
 
         //
         wrefresh(*type_win);
@@ -145,8 +145,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       if (size >= (i+length_of_type)){ //then there is a character to latch on to
         i = i+length_of_type;
-        getyx(*type_win, y, x);
-        wmove(*type_win, y+1, x);
+        //getyx(*type_win, y, x);
+        wmove(*type_win, 0, i);
         //
         //
         wrefresh(*type_win);
@@ -156,8 +156,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //just move the cursor, and where you are on the message, but don't affect anything
       //
       i--;
-      getyx(*type_win, y, x);
-      wmove(*type_win, y, x-1);
+      //getyx(*type_win, y, x);
+      wmove(*type_win, 0, i);
       wrefresh(*type_win);
       break;
     case KEY_RIGHT:
@@ -170,8 +170,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
         //can't do anything
       }else{
         i++;
-        getyx(*type_win, y, x);
-        wmove(*type_win, y, x+1);
+        //getyx(*type_win, y, x);
+        wmove(*type_win, 0, i);
         wrefresh(*type_win);
       }
       break;
