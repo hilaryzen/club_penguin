@@ -9,13 +9,13 @@
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
-int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win, struct penguin *p);
 int cleanup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win);
-int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, int char_y, int char_x);
+int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, struct penguin *p);
 int add_to_log(char *message, int i); //if file doesn't already exist, will create
 int print_log(WINDOW **log_window); //clears, adds and reprints. must refresh typing window after to move cursor
-void background(WINDOW **game_win, WINDOW **type_win);
-void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move);
+void display_A(WINDOW **game_win, WINDOW **type_win);
+void display_penguin(WINDOW **game_win, WINDOW **type_win, struct penguin *p);
 
 struct penguin {
   char *username;
@@ -27,8 +27,10 @@ int main(int argc, char *argv[]){
   WINDOW *game_win;
   WINDOW *chat_win;
   WINDOW *type_win;
+  struct penguin p;
+  struct penguin *pp = &p;
   int ch;
-  if (setup(&game_win, &chat_win, &type_win)){
+  if (setup(&game_win, &chat_win, &type_win, pp)){
     printf("uh oh, setup failed\n");
   }
   /*
@@ -38,10 +40,9 @@ int main(int argc, char *argv[]){
     wrefresh(type_win);
 	}
   */
-  int char_y = LINES / 2; //Position of A
-  int char_x = COLS / 4;
-  display_A(&game_win, &type_win, char_y, char_x, 0, 0);
-  if (read_from_type(&game_win, &type_win, &chat_win, char_y, char_x)){
+  display_A(&game_win, &type_win);
+  display_penguin(&game_win, &type_win, pp);
+  if (read_from_type(&game_win, &type_win, &chat_win, pp)){
     printf("uh oh, can't read from type window!\n");
   }
   if (cleanup(&game_win, &chat_win, &type_win)){
@@ -63,7 +64,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, int char_y, int char_x){
+int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, struct penguin *p){
   //remember we are catching special keys, called keypad(win, TRUE) in setup
   int ch = ' ';
   keypad(*type_win, TRUE);
@@ -106,27 +107,31 @@ int read_from_type(WINDOW **game_win, WINDOW **type_win, WINDOW **print_errs, in
           break;
         */
         case KEY_UP:
-          if (char_y > 1) {
-            display_A(game_win, type_win, char_y, char_x, -1, 0);
-            char_y -= 1;
+          if (p->y > 1) {
+            p->y -= 1;
+            display_A(game_win, type_win);
+            display_penguin(game_win, type_win, p);
           }
           break;
         case KEY_DOWN:
-          if (char_y < LINES - 3) {
-            display_A(game_win, type_win, char_y, char_x, 1, 0);
-            char_y += 1;
+          if (p->y < LINES - 3) {
+            p->y += 1;
+            display_A(game_win, type_win);
+            display_penguin(game_win, type_win, p);
           }
           break;
         case KEY_LEFT:
-          if (char_x > 0) {
-            display_A(game_win, type_win, char_y, char_x, 0, -1);
-            char_x -= 1;
+          if (p->x > 0) {
+            p->x -= 1;
+            display_A(game_win, type_win);
+            display_penguin(game_win, type_win, p);
           }
           break;
         case KEY_RIGHT:
-          if (char_x < COLS / 2 - 3) {
-            display_A(game_win, type_win, char_y, char_x, 0, 1);
-            char_x += 1;
+          if (p->x < COLS / 2 - 3) {
+            p->x += 1;
+            display_A(game_win, type_win);
+            display_penguin(game_win, type_win, p);
           }
           break;
         case KEY_F(1):
@@ -198,7 +203,7 @@ int print_log(WINDOW **log_window){
   close(fd); //close when done
   return 0;
 }
-int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
+int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win, struct penguin *p){
 	int startx, starty, width, height;
 
 	initscr();			/* Start curses mode 		*/
@@ -259,35 +264,18 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   wrefresh(*type_win);
   // // //don't need box for type
 
+  p->username = "user";
+  p->y = LINES / 2;
+  p->x = COLS / 4;
+
   return 0; //just to show that it works
 }
 
-void background(WINDOW **game_win, WINDOW **type_win) {
-	attron(COLOR_PAIR(1));
-
-  wmove(*game_win, LINES - 7, 0);
-  whline(*game_win, ACS_HLINE, COLS / 2);
-  /*
-  int i = 0;
-  while(i < COLS / 2){
-    mvwaddch(*game_win, LINES - 7, i, ACS_HLINE);
-    i++;
-  }
-  */
-  //mvwprintw(*game_win, 2, 5, "A");
-  wrefresh(*game_win);
-
-  attroff(COLOR_PAIR(1));
-}
-
-void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
+void display_A(WINDOW **game_win, WINDOW **type_win) {
   //4: blue and blue
   //3: yellow and green
   //2: red and black
   //1: black and white
-  wattron(*game_win, COLOR_PAIR(1));
-  mvwprintw(*game_win, y, x, " ");
-  wattroff(*game_win, COLOR_PAIR(1));
 
   //Print grass
   wattron(*game_win, COLOR_PAIR(3));
@@ -317,11 +305,16 @@ void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, i
   }
   wattroff(*game_win, COLOR_PAIR(4));
 
+  wmove(*type_win, 0, 0); //Moves cursor back to type window
+  wrefresh(*game_win);
+  wrefresh(*type_win);
+}
+
+void display_penguin(WINDOW **game_win, WINDOW **type_win, struct penguin *p) {
   wattron(*game_win, COLOR_PAIR(2));
-  wmove(*game_win, y + y_move, x + x_move);
+  wmove(*game_win, p->y, p->x);
   waddch(*game_win, ACS_BLOCK);
   wattroff(*game_win, COLOR_PAIR(2));
-  //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
   wmove(*type_win, 0, 0); //Moves cursor back to type window
   wrefresh(*game_win);
   wrefresh(*type_win);
