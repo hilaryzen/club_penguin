@@ -91,7 +91,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       werase(*type_win);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win, y, x-1);
+      wmove(*type_win, y, x+1);
       //
       //
       wrefresh(*type_win); //refresh the window
