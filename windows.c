@@ -109,7 +109,7 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     //else if it's special
     switch (ch){ //switch so we can add diff stuff later
     case KEY_BACKSPACE:
-      deletechar(message, (i-1)); //you want to delete what is behind the cursor, and take it's place
+      deletechar(message, (i)); //you want to delete what is behind the cursor, and take it's place
       //
       //
       getyx(*type_win, y, x);
