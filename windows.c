@@ -50,7 +50,7 @@ void deletechar(char *buf,int i){
     while(i<j){
       buf[i] = buf[++i];
     }
-    buf[j-1] = '\0'; //i hope this works 
+    buf[j-1] = '\0'; //i hope this works
   }
 
 }
@@ -97,8 +97,8 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       getyx(*type_win, y, x);
       mvwprintw(*type_win,0,0,message);
-      wmove(*type_win,y,i);
       wrefresh(*type_win);
+      wmove(*type_win,y,i);
       break;
     case KEY_DC:
       i--;
