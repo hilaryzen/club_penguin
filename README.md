@@ -1,29 +1,39 @@
-# club_penguin
-# Names: Kiran Vuksanaj, Hilary Zen and Alma Thaler
-# Group Name: Puffles
+# Club Penguin
+Welcome to your very own terminal-based club-penguin themed chat room!
+## Team Puffles
+**Period 4's** home team  
+[Kiran](https://github.com/kiran-vuksanaj): Networking extraordinaire  
+[Hilary](https://github.com/hilaryzen): Game window goddess  
+[Alma](https://github.com/almathaler): Chat window collaborator  
 
-Our project seeks to revive the recently deceased multiplayer game/chatroom, Club Penguin.
+## Project Description  
+The main feature of our project is a networked chat room, allowing the user both text interaction  
+and virtual interaction with other players. Our project features a forking server, which handles  
+user information packet-style. Our program runs solely in your terminal window -- please do not attempt  
+to resize it while playing!  
 
-All interaction will occur through the user’s terminal. On the left-hand side will be an ‘igloo’, populated by the user’s avatar and other users’ avatars too. On the right-hand side will be a scrollable chat which each user can interact with. Our bonus end goal is having mini-games, but the main feature of our project is a networked chat room and avatar movement that appears seamless.
+## NCURSES -- How to install and link 
+To install ncurses on your machine, just enter the following into your terminal:   
+```bash
+sudo apt-get install libncurses5-dev
+```
+Other than this, ncurses is linked within our makefile. No other action is required!  
 
-In this project, we plan to use networking, semaphores, pipes, signals, and multiple processes. Using networking will enable multiple players to join the same game from different computers and interact with each other, while semaphores will be used to limit the number of users connected at a time. On the server side, one subprocess will be dedicated to each user, listening for messages received from the user and, upon reception, interpreting the message, updating the board in shared memory (write access to be semaphore controlled), and writing a new message to an “outbox queue” (whose write access will also be controlled by a semaphore). Another process will be dedicated to processing the outbox, writing the message to each connected socket.
+## How to Use  
+Welcome! There are a few things you need to know before logging on to Team Puffle's Club Penguin:  
+- Move your cursor around with the F1-4 keys
+- Type your chat message in the typing window, and hit enter when done!
+- Move your avatar around with the arrow keys 
+- Socialize, and enjoy your time here as a colorful aquatic flightless bird
 
-We also plan to use structs for each avatar that will contain information like its position on the screen, and for different types of messages to be sent through sockets, such as a change of position or a chat message. The board that each player sees will continuously update based on these structs.
+## Known Bugs/Usage Restrcitions
+Within the chat:  
+1. You may use up, down, right and left arrow keys to modify your cursor position. However, if you   
+   have multiple lines of text in your message, you must use up and down keys to switch the vertical  
+   position of your cursor.
 
-We have divided the project into three main parts. Kiran will implement the networking aspect, Alma will build the chat feature, and Hilary will create the terminal display of avatars. Since the chat and avatar display are all on one screen, Hilary and Alma will also need to work together to integrate those two aspects. One challenge may be implementing a scrolling chat, while the igloo display remains static in position.
-
-# Timeline
-
-Jan 6: Player can start the program and move an avatar on the screen
-
-Jan 8: Add a chat where the player can type messages and see them on the screen
-
-Jan 13: Complete networking so that multiple players can join the game
-
-Jan 15: All players can type into the chat, but only one message is added at a time
-
-Jan 17: Add different rooms where players can go into
-
-(Extra) Add some minigames that only involve one player
-
-(Extra) Scrollable chat
+2. If you have multiple lines in your message, you may use backspace or the delete key to delete a whole line 
+   and move in to the previous. However, if you first modify the cursor position horizontally, backspace will 
+   still move in to the previous line, but the cursor will not reflect this.
+   
+3. You can move your cursor into the chat window, but you cannot scroll through it

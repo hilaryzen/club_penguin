@@ -88,3 +88,11 @@ hilaryZ -- 2020-01-09 00:58
     -got up and down arrow keys to work. however there is a BUG: if you have 4 lines of chat written (only feasible
      on a very small window bc our max message size is 80), and you do up, up, up from the bottom, you won't be able
      to see where you are in the message but you will be at the first line. this is bc we don't have scrolling
+     
+ almaT -- 2020-01-20 17:29
+    -best version of chat: b820ca5c23185387cf5d7975bd91429b0d167f6d on fix_chat
+    -up, down, left and right arrow keys work with inserting and deleting characters
+    -fixed bug where, no matter where cursor is, you can only delete from end of message
+    -new bug that probably will not be fixed: you cannot right/left arrow key into a new line. Undefined behavior if you
+     do that. Additionally, while you can backspace a whole line and move onto the previous, this does not work if you are
+     backspacing after changing cursor position with left or right keys
