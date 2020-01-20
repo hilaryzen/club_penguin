@@ -102,7 +102,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       wrefresh(*type_win);
       break;
     case KEY_RIGHT:
-      insertchar(message, i, ' ');
+      //insertchar(message, i, ' ');
+      if (i == size){
+        insertchar(message, i, ' ');
+      }
       i++;
       //size++;
       //instead, we should check in sending message whether or not i = size-1. if yes then we have to increment size
