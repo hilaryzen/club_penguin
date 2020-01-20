@@ -96,9 +96,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
       //
       //
       getyx(*type_win, y, x);
+      werase(*type_win);
       mvwprintw(*type_win,0,0,message);
       wrefresh(*type_win);
-      wmove(*type_win,y,i);
+      //wmove(*type_win,y,i);
       break;
     case KEY_DC:
       i--;
