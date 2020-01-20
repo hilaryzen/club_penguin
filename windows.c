@@ -8,6 +8,7 @@
 #include "windows.h"
 #include "client.h"
 #include "err.h"
+#include "packets.h"
 //PATH = "log.txt"
 
 void insertchar(char *buf,int i,char c){
@@ -34,6 +35,40 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	wrefresh(local_win);		/* Show that box 		*/
 
 	return local_win;
+}
+
+int arrows_game(WINDOW **type_win, WINDOW **game_win, struct playermove *me){
+  int char_y = me->r;
+  int char_x = me->c;
+  int ch = wgetch(*game_win);
+  switch(ch){
+  case KEY_UP:
+    if (char_y > 1) {
+      display_A(game_win, type_win, char_y, char_x, -1, 0);
+      char_y -= 1;
+    }
+    break;
+  case KEY_DOWN:
+    if (char_y < LINES - 3) {
+      display_A(game_win, type_win, char_y, char_x, 1, 0);
+      char_y += 1;
+    }
+    break;
+  case KEY_LEFT:
+    if (char_x > 0) {
+      display_A(game_win, type_win, char_y, char_x, 0, -1);
+      char_x -= 1;
+    }
+    break;
+  case KEY_RIGHT:
+    if (char_x < COLS / 2 - 3) {
+      display_A(game_win, type_win, char_y, char_x, 0, 1);
+      char_x += 1;
+    }
+    break;
+  }
+  me->r = char_y;
+  me->c = char_x;
 }
 
 int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz){
