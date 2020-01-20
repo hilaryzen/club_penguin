@@ -83,3 +83,8 @@ hilaryZ -- 2020-01-09 00:58
     -used memmove for arrow key insertion, works
     -added extra null for backspace, works
     -chat functionality complete, just need to add scrolling 
+    
+ almaT -- 2020-01-20 02:49
+    -got up and down arrow keys to work. however there is a BUG: if you have 4 lines of chat written (only feasible
+     on a very small window bc our max message size is 80), and you do up, up, up from the bottom, you won't be able
+     to see where you are in the message but you will be at the first line. this is bc we don't have scrolling
