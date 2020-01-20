@@ -74,6 +74,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 }
 
 int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char *message, int *ind,int *sz){
+  int length_of_type = COLS - (COLS / 2 + 3);
   int i = *ind;
   int size = *sz;
   //remember we are catching special keys, called keypad(win, TRUE) in setup
@@ -129,12 +130,11 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_UP:
       //
       //
-      if (i > 37){
-        i = i-37;
-        //getyx(*type_win, y, x);
-        wmove(*type_win, 0, i);
-        //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
-        //
+      if (i > length_of_type){
+        i = i-length_of_type;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y-1, x);
+
         //
         wrefresh(*type_win);
       }
@@ -142,11 +142,10 @@ int read_from_type(WINDOW **type_win, WINDOW **chat_win, WINDOW **game_win,char 
     case KEY_DOWN:
       //
       //
-      if (size >= (i+37)){ //then there is a character to latch on to
-        i = i+37;
-        //getyx(*type_win, y, x);
-        wmove(*type_win, 0, i);
-        //modify i to be the i of that point of the message, i think i = x * (y+1) not sure tho
+      if (size >= (i+length_of_type)){ //then there is a character to latch on to
+        i = i+length_of_type;
+        getyx(*type_win, y, x);
+        wmove(*type_win, y+1, x);
         //
         //
         wrefresh(*type_win);
@@ -297,7 +296,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   startx = COLS / 2 + 2;
   *chat_win = create_newwin(height, width, starty, startx);
   height = 3;
-  width = COLS - (COLS / 2 + 3);
+  width = COLS - (COLS / 2 + 3); //this is how many characters long our box actually is?
   starty = LINES - 4;
   startx = COLS / 2 + 2;
   *type_win = create_newwin(height, width, starty, startx);
