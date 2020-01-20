@@ -37,38 +37,38 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
 	return local_win;
 }
 
-int arrow_game(WINDOW **type_win, WINDOW **game_win, struct playermove *me){
-  int char_y = me->r;
-  int char_x = me->c;
-  int ch = wgetch(*game_win);
+int arrow_game(WINDOW *game_win, struct playermove *me){
+  int ch = wgetch(game_win);
   switch(ch){
   case KEY_UP:
-    if (char_y > 1) {
-      display_A(game_win, type_win, char_y, char_x, -1, 0);
-      char_y -= 1;
+    if (me->r > 1) {
+      me->r -= 1;
+      return 1;
     }
-    break;
+    return 0;
   case KEY_DOWN:
-    if (char_y < LINES - 3) {
-      display_A(game_win, type_win, char_y, char_x, 1, 0);
-      char_y += 1;
+    if (me->r < LINES - 3) {
+      me->r += 1;
+      return 1;
     }
-    break;
+    return 0;
   case KEY_LEFT:
-    if (char_x > 0) {
-      display_A(game_win, type_win, char_y, char_x, 0, -1);
-      char_x -= 1;
+    if (me->c > 0) {
+      me->c -= 1;
+      return 1;
     }
-    break;
+    return 0;
   case KEY_RIGHT:
-    if (char_x < COLS / 2 - 3) {
-      display_A(game_win, type_win, char_y, char_x, 0, 1);
-      char_x += 1;
+    if (me->c < COLS / 2 - 3) {
+      me->c += 1;
+      return 1;
     }
-    break;
+    return 0;
+  case KEY_F(1):
+    return -1;
+  case KEY_F(3):
+    return 0;
   }
-  me->r = char_y;
-  me->c = char_x;
   return 0;
 }
 
@@ -321,15 +321,18 @@ void background(WINDOW **game_win, WINDOW **type_win) {
   attroff(COLOR_PAIR(1));
 }
 
-void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move) {
+void display_A(WINDOW **game_win, struct cnx_header *users) {
   //4: blue and blue
   //3: yellow and green
   //2: red and black
   //1: black and white
+  int x,y;
+  getyx(*game_win,y,x);
+  /*
   wattron(*game_win, COLOR_PAIR(1));
   mvwprintw(*game_win, y, x, " ");
   wattroff(*game_win, COLOR_PAIR(1));
-
+  */
   //Print grass
   wattron(*game_win, COLOR_PAIR(3));
   int b = 3;
@@ -359,13 +362,17 @@ void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, i
   wattroff(*game_win, COLOR_PAIR(4));
 
   wattron(*game_win, COLOR_PAIR(2));
-  wmove(*game_win, y + y_move, x + x_move);
-  waddch(*game_win, ACS_BLOCK);
+  int i;
+  for(i = 0; i < MAX_CNX; i++ ){
+    if( users[i].id >= 0 ){
+      wmove(*game_win, users[i].pos.r , users[i].pos.c);
+      waddch(*game_win, ACS_BLOCK);
+    }
+  }
   wattroff(*game_win, COLOR_PAIR(2));
   //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
-  wmove(*type_win, 0, 0); //Moves cursor back to type window
+  wmove(*game_win,y,x);
   wrefresh(*game_win);
-  wrefresh(*type_win);
 }
 
 int in_gamewin(WINDOW *gamewin){

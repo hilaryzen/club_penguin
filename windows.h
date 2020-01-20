@@ -11,8 +11,8 @@ int read_from_type(WINDOW **type_win, WINDOW **print_errs, WINDOW **game_win,cha
 int print_log(WINDOW **log_window,int fd); //clears, adds and reprints. must refresh typing window after to moxve cursor
 
 void background(WINDOW **game_win, WINDOW **type_win);
-void display_A(WINDOW **game_win, WINDOW **type_win, int y, int x, int y_move, int x_move);
+void display_A(WINDOW **game_win, struct cnx_header *users);
 
-int arrow_game(WINDOW **game_win, WINDOW **type_win, struct playermove *me);
+int arrow_game(WINDOW *game_win,struct playermove *me);
 int in_gamewin(WINDOW *game_win);
 #endif

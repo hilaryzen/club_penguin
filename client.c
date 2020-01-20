@@ -49,6 +49,8 @@ int main(int argc, char *argv[]){
   fgets(proposed_info.username,16,stdin);
   *(strchr(proposed_info.username,'\n')) = '\0'; // eliminate newline
   proposed_info.room = 0;
+  proposed_info.pos.r = 0;
+  proposed_info.pos.c = 0;
 
   //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
   char log_filename[16];
@@ -73,6 +75,7 @@ int main(int argc, char *argv[]){
 
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);
+  keypad(game_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
   wmove(type_win, 0, 0); //set cursor
   char message[128];
@@ -94,12 +97,22 @@ int main(int argc, char *argv[]){
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       if( in_gamewin(game_win) ){
-	if( arrow_game(&game_win,&type_win,&users[id].pos) ) break;
-	// once arrow has been processed, send the arrow stuff to the server
-	header.packet_type = P_PLAYERMOVE;
-	header.packet_size = sizeof( struct playermove );
-	write(sd,&header,sizeof( struct packet_header ));
-	write(sd,&users[id].pos,sizeof(struct playermove));
+	r = arrow_game(game_win,&users[id].pos);
+	if( r < 0 ) break;
+	else if( r > 0 ){
+	  header.packet_type = P_PLAYERMOVE;
+	  header.packet_size = sizeof( struct playermove );
+	  write(sd,&header,sizeof( struct packet_header ));
+	  write(sd,&users[id].pos,sizeof(struct playermove));
+
+	  wmove(game_win,1,1);
+	  wrefresh(game_win);
+	}else{
+	  wmove(game_win,0,0);
+	  wrefresh(game_win);
+	  wmove(type_win,0,0);
+	  wrefresh(type_win);
+	}
       }else{
 	if( read_from_type(&type_win,&chat_win,&game_win,message,&i,&size) ) break;
       }
@@ -129,8 +142,8 @@ int main(int argc, char *argv[]){
 	wrefresh(type_win);
 	break;
       case P_PLAYERMOVE:
-	// do stuff for updating screen
 	users[ header.id ].pos = packet.PLAYERMOVE;
+	display_A(&game_win,users);
 	break;
       case P_CNX_HEADER:
 	sprintf(msgbuffer,"%s has joined the game\n",packet.CNX_HEADER.username);
@@ -139,14 +152,15 @@ int main(int argc, char *argv[]){
 	wrefresh(type_win);
 	// do stuff for updating screen
 	users[ header.id ] = packet.CNX_HEADER;
+	display_A(&game_win,users);
 	break;
       case P_GOODBYE:
 	sprintf(msgbuffer,"%s has left the game\n",users[ header.id ].username);
 	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
 	print_log(&chat_win,log_fd);
 	wrefresh(type_win);
-
 	users[ header.id ].id = -1;
+	display_A(&game_win,users);
 	break;
       }
     }
