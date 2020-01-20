@@ -17,7 +17,8 @@
 
 int touch_log = 1;
 int sd; // descriptor for socket to the server
-struct cnx_header cnx_info; // struct which contains information about our connection
+struct cnx_header users[MAX_CNX];
+int id;
 
 int main(int argc, char *argv[]){
 
@@ -29,9 +30,7 @@ int main(int argc, char *argv[]){
   struct packet_header header;
   union packet packet;
   /* array for storing current state of all players */
-  struct cnx_header users[MAX_CNX];
   for( r=0; r<MAX_CNX; r++ ) users[r].id = -1;
-  int id; // my identifier
   /* ncurses windows for typing buffer, game display, and chat window */
   WINDOW *game_win;
   WINDOW *chat_win;
@@ -45,10 +44,11 @@ int main(int argc, char *argv[]){
 
   // CONFIGURE CONNECTION INFO
   // default indications, such as your username, etc, would go here
+  struct cnx_header proposed_info;
   printf("username: ");
-  fgets(cnx_info.username,16,stdin);
-  *(strchr(cnx_info.username,'\n')) = '\0'; // eliminate newline
-  cnx_info.room = 0;
+  fgets(proposed_info.username,16,stdin);
+  *(strchr(proposed_info.username,'\n')) = '\0'; // eliminate newline
+  proposed_info.room = 0;
 
   //BEFORE YOU CONNECT TO SERVER, SET UP YOUR CHAT LOG
   char log_filename[16];
@@ -61,12 +61,12 @@ int main(int argc, char *argv[]){
   // CONNECT TO THE SERVER
   sd = client_setup(host);
   printf("[client] setup on sd %d\n",sd);
-  write(sd,&cnx_info,sizeof(struct cnx_header));
+  write(sd,&proposed_info,sizeof(struct cnx_header));
   printf("[client] wrote connection header\n");
-  read(sd,&cnx_info,sizeof(struct cnx_header));
+  read(sd,&proposed_info,sizeof(struct cnx_header));
   printf("[client] received completed header\n");
-  users[ cnx_info.id ] = cnx_info;
-  id = cnx_info.id;
+  users[ proposed_info.id ] = proposed_info;
+  id = proposed_info.id;
   
   // CONFIGURE WINDOWS
   exit_err( setup(&game_win,&chat_win,&type_win) , "configure ncurses windows" );
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
       case P_CHATMSG:
 	packet.CHATMSG.message[header.packet_size] = '\0';
 	memset(msgbuffer,0,sizeof(msgbuffer));
-	sprintf(msgbuffer,"%s:%s",header.username,packet.CHATMSG.message);
+	sprintf(msgbuffer,"%s:%s",users[ header.id ].username,packet.CHATMSG.message);
 	add_to_log(msgbuffer,strlen(msgbuffer),log_fd);
 	print_log(&chat_win,log_fd);
 	wrefresh(type_win);
@@ -201,7 +201,6 @@ void sendchat(char *msg, int size){
   memset(&header,0,sizeof(struct packet_header));
   memset(&message,0,sizeof(struct chatmsg));
   //alma adding that you fill in header to have username too
-  strncpy(header.username, cnx_info.username,16);
   strncpy(message.message,msg,size);
   //
   header.packet_type = P_CHATMSG;
