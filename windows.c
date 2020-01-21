@@ -348,7 +348,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 	init_pair(3, COLOR_YELLOW, COLOR_GREEN);
   init_pair(2, COLOR_RED, COLOR_YELLOW);
   init_pair(4, COLOR_BLUE, COLOR_BLUE);
-  
+
   //our three boxes
   height = LINES - 2;
   width = COLS / 2;
@@ -387,6 +387,7 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   //we don't need the box so let's erase
   //werase(*type_win);
   //DONT redraw the box
+  wmove(*type_win, 0, 0);
   wrefresh(*type_win);
   // // //don't need box for type
 
