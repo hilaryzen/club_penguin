@@ -447,7 +447,6 @@ void display_A(WINDOW **game_win, struct cnx_header *users) {
   //1: black and white
   int x,y;
   getyx(*game_win,y,x);
-  wmove(*game_win,y,x);
   /*
   wattron(*game_win, COLOR_PAIR(1));
   mvwprintw(*game_win, y, x, " ");
@@ -491,6 +490,7 @@ void display_A(WINDOW **game_win, struct cnx_header *users) {
   }
   wattroff(*game_win, COLOR_PAIR(2));
   //mvwprintw(*game_win, y + y_move, x + x_move, "\U0001F427");
+  wmove(*game_win,y,x);
   wrefresh(*game_win);
 }
 
