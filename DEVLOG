@@ -96,3 +96,16 @@ hilaryZ -- 2020-01-09 00:58
     -new bug that probably will not be fixed: you cannot right/left arrow key into a new line. Undefined behavior if you
      do that. Additionally, while you can backspace a whole line and move onto the previous, this does not work if you are
      backspacing after changing cursor position with left or right keys
+
+kiranV -- 2020-01-20
+   -oh this is a whole load of stuff (its the whole day so no timestamp)
+   -merged hilary's code for displaying background into master
+   -added '<user> has joined/left the game' messages to chat
+   -added setup/breakdown code to run on join/leave; sending of current state data at the start of game, empty packet at the end of game
+   -modified server structure to properly update shared memory for playermove structs
+   -wrote code to send playermove struct rather than update the screen
+   -rewrote display_A() to render all players' locations
+   -probably some other stuff i forgot
+   REMAINING BUGS:
+   	-the background stopped showing up
+	-cursor is weird when nothing has yet been done, should be fixed
