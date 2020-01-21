@@ -337,6 +337,18 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
   //scrollok(*chat_win, TRUE);
   //scrollok(*type_win, TRUE);
+
+  if(has_colors() == FALSE)
+	{	endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+  start_color();			/* Start color 			*/
+  init_pair(1, COLOR_BLACK, COLOR_WHITE);
+	init_pair(3, COLOR_YELLOW, COLOR_GREEN);
+  init_pair(2, COLOR_RED, COLOR_YELLOW);
+  init_pair(4, COLOR_BLUE, COLOR_BLUE);
+  
   //our three boxes
   height = LINES - 2;
   width = COLS / 2;
