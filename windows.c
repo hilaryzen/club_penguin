@@ -229,7 +229,6 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
 				 * everty thing to me 		*/
   noecho(); //so that what you type doesn't show up on the screen
   keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
-  printw("HEY\n");
   //scrollok(*chat_win, TRUE);
   //scrollok(*type_win, TRUE);
   //our three boxes
@@ -272,7 +271,6 @@ int setup(WINDOW **game_win, WINDOW **chat_win, WINDOW **type_win){
   //DONT redraw the box
   wrefresh(*type_win);
   // // //don't need box for type
-  printf("is it not finishing this?\n");
 
   return 0; //just to show that it works
 }

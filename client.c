@@ -71,13 +71,17 @@ int main(int argc, char *argv[]){
   
   // CONFIGURE WINDOWS
   r = setup(&game_win,&chat_win,&type_win);
-  printf("hmmmm\n");
+  exit_err(r,"configure windows");
 
   // (from read_from_type(): configure text input spacing
   keypad(type_win, TRUE);
   keypad(game_win, TRUE);
   scrollok(type_win, TRUE); //so if we've printed out of the window, will just scroll down
+  display_A(&game_win,users);
+  wmove(game_win,0,0);
+  wrefresh(game_win);
   wmove(type_win, 0, 0); //set cursor
+  wrefresh(type_win);
   char message[128];
   memset(message,0,sizeof(message));
   //char *to_send;
@@ -93,7 +97,7 @@ int main(int argc, char *argv[]){
     // 2. SELECT(): reset set configuration and then wait for one of the internal sd's to have data; either stdin or sd
     reset_fdset(&readset,sd);
     select(sd+1,&readset,NULL,NULL,NULL);
-
+    // wprintw(chat_win,"somethings ready!");
     // IF STDIN IS READY: HANDLE USER INPUT
     if (FD_ISSET(STDIN_FILENO,&readset)) {
       if( in_gamewin(game_win) ){
@@ -171,6 +175,7 @@ int main(int argc, char *argv[]){
   }
   //sleep(2); just did this to test that cleanup works
   endwin();			/* End curses mode		  */
+  printf("Goodbye!\n");
 
   return 0;
 }
