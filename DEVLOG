@@ -45,50 +45,71 @@ almaT -- 2020-01-06 23:16
     username in the wrong place (I though writing cnx_info in process_queue would mean that messages sent from almaLisa would
     get tagged as such to almaBart, but it just seems like all messages are from almaBart)
 
+almaT -- 2020-01-07
+    -changed render.c and dupped so that we can write to file and print file to stdout
+
 hilaryZ -- 2020-01-08 01:31
     -created sdl branch and wrote program to open a new window and allow the user to move a penguin around
     -added separate main.c file and makefile in a folder, will work on combining this with the chat
 
+almaT -- 2020-01-08
+    -fixed the username error, now username of that who sent the message is added to log
+
 hilaryZ -- 2020-01-09 00:58
     -added test files using ncurses to sdl_practice folder on the sdl branch
     -created layout of three windows that will contain the user's game, chat, and message being typed
-    
- almaT -- 2020-01-07 
-    -changed render.c and dupped so that we can write to file and print file to stdout
-    
- almaT -- 2020-01-08
-    -fixed the username error, now username of that who sent the message is added to log
-    
+
  almaT -- 2020-01-09
     -started using ncurses, major windowing addition. currently have 3 box windows, working on typing in bottom chat and getting
      to print in top chat
     -current error: special characters not being caught?
-  
+
  almaT -- 2020-01-10
     -changed window structure, made windows.c a lot more modular, got rid of boxes so no weird typing over border
     -attempted adding backspace functionality
- 
+
  almaT -- 2020-01-10
-    -noticed issue where if you type 'hey what's up' and then backspace and write 'hi', 'hiy what's up' will be sent 
- 
+    -noticed issue where if you type 'hey what's up' and then backspace and write 'hi', 'hiy what's up' will be sent
+
+hilaryZ -- 2020-01-10
+    -worked on moving a character displayed in the game window with the arrow keys, in the sdl branch
+
  almaT -- 2020-01-13
     -fixed the above issue by creating 'size' variable along w the preexisting counter 'i'
-    
+
  almaT -- 2020-01-14
     -fixed not sending whole chat bc of wrong variable sent in server
     -can switch between windows, undefined behavior if you use up and down arrow keys
+
+hilaryZ -- 2020-01-15
+    -started adding a new background function to print a line
+    -penguin moves over it, and the line is displayed again after the character moves off of it
+
+hilaryZ -- 2020-01-16
+    -started working with colors in ncurses
+    -printing green and making the charater a different color in the terminal
+
+hilaryZ -- 2020-01-17
+    -colored the whole game screen with green and blue
+    -using colors makes the terminal screen black, tried to set it back to white
+
+hilaryZ -- 2020-01-19
+    -started new branch add_game_win from master
+    -added on_game_win variable to keep track of whether user wants to move character or move around chat
+    -merged display methods from sdl branch with the chat in windows.c
+    -started adding structs for each character, to track their position
 
  almaT -- 2020-01-20 02:25
     -backspace and arrow keys were not working. not updating the chat/just completely defunct
     -used memmove for arrow key insertion, works
     -added extra null for backspace, works
-    -chat functionality complete, just need to add scrolling 
-    
+    -chat functionality complete, just need to add scrolling
+
  almaT -- 2020-01-20 02:49
     -got up and down arrow keys to work. however there is a BUG: if you have 4 lines of chat written (only feasible
      on a very small window bc our max message size is 80), and you do up, up, up from the bottom, you won't be able
      to see where you are in the message but you will be at the first line. this is bc we don't have scrolling
-     
+
  almaT -- 2020-01-20 17:29
     -best version of chat: b820ca5c23185387cf5d7975bd91429b0d167f6d on fix_chat
     -up, down, left and right arrow keys work with inserting and deleting characters
@@ -108,4 +129,4 @@ kiranV -- 2020-01-20
    -probably some other stuff i forgot
    REMAINING BUGS:
    	-the background stopped showing up
-	-cursor is weird when nothing has yet been done, should be fixed
+	  -cursor is weird when nothing has yet been done, should be fixed
