@@ -17,6 +17,13 @@ void process( struct cnx_header *cnx_info, struct packet_header *header, union p
 
   // currently im doing no processing, simply adding the id of the user who sent to the header and writing it to the queue
   // in the future, you could filter out packets that, say, move a player onto the spot of another player, and instead write an error message to the queue to send back to the user
+  switch(header->packet_type){
+  case P_PLAYERMOVE:
+    cnx_info->pos = packet->PLAYERMOVE;
+    break;
+  default:
+    break;
+  }
   header->id = cnx_info->id;
   qwrite(header, packet,qd);
 }

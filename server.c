@@ -164,9 +164,11 @@ void subserver_listen(int id,int qd){
     printf("[subserver %d] received a packet\n",getpid());
     // read contents of packet from the socket
     read(SHM[id].sd,&packet,header.packet_size);
+    sem_claim(SEMD,SHM_SEMA);
     // call `process`, as defined in processor.c:process()
     // `qd` can be used inside in order to call qwrite()
     process(SHM+id,&header,&packet,qd);
+    sem_release(SEMD,SHM_SEMA);
   }
   // end of socket, or an error in reading the header
   printf("[subserver %d] socket is gone or bad data sent\n",getpid());
